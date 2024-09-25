@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Windows Mobile (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Windows Mobile (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
