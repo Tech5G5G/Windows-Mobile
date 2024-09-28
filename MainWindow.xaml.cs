@@ -49,6 +49,14 @@ namespace Windows_Mobile
 
         Packaged = 2
     }
+
+    public class StartMenuItem
+    {
+        public string ItemName { get; set;  }
+        public ApplicationKind ItemKind { get; set; }
+        public string ItemStartURI { get; set; }
+    }
+
     public sealed partial class MainWindow : Window
     {
         public MainWindow()
