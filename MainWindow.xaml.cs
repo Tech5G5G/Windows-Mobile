@@ -98,10 +98,14 @@ namespace Windows_Mobile
                 if (!item.EndsWith(".ini"))
                 {
                     FileInfo file = new FileInfo(item);
-
                     string name = file.Name.Replace(file.Extension, string.Empty);
 
-                    allApps.Add(new TextBlock() { Text = name, Name = item, Tag = "Normal" });
+                    var MenuItem = new StartMenuItem();
+                    MenuItem.ItemName = name;
+                    MenuItem.ItemStartURI = item;
+                    MenuItem.ItemKind = ApplicationKind.Normal;
+
+                    allApps.Add(new TextBlock() { Text = name, Tag = MenuItem });
                 }
             }
 
@@ -130,10 +134,14 @@ namespace Windows_Mobile
                 if (!item.EndsWith(".ini"))
                 {
                     FileInfo file = new FileInfo(item);
-
                     string name = file.Name.Replace(file.Extension, string.Empty);
 
-                    allApps.Add(new TextBlock() { Text = name, Name = item, Tag = "Normal" });
+                    var MenuItem = new StartMenuItem();
+                    MenuItem.ItemName = name;
+                    MenuItem.ItemStartURI = item;
+                    MenuItem.ItemKind = ApplicationKind.Normal;
+
+                    allApps.Add(new TextBlock() { Text = name, Tag = MenuItem });
                 }
             }
 
@@ -149,7 +157,12 @@ namespace Windows_Mobile
 
                     foreach (AppListEntry appListEntry in appListEntries)
                     {
-                        allApps.Add(new TextBlock() { Text = appListEntry.DisplayInfo.DisplayName, Name = package.Id.Name, Tag = "Packaged" });
+                        var MenuItem = new StartMenuItem();
+                        MenuItem.ItemName = appListEntry.DisplayInfo.DisplayName;
+                        MenuItem.ItemStartURI = package.Id.Name;
+                        MenuItem.ItemKind = ApplicationKind.Packaged;
+
+                        allApps.Add(new TextBlock() { Text = appListEntry.DisplayInfo.DisplayName, Tag = MenuItem });
                     }
                 }
             }
