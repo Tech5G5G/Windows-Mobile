@@ -43,9 +43,12 @@ using System.Drawing;
 
 namespace Windows_Mobile
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
+    public enum ApplicationKind
+    {
+        Normal = 1,
+
+        Packaged = 2
+    }
     public sealed partial class MainWindow : Window
     {
         public MainWindow()
