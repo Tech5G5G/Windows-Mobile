@@ -201,12 +201,10 @@ namespace Windows_Mobile
         {
             if (apps.SelectedItem is not null)
             {
-                TextBlock selectedItem = apps.SelectedItem as TextBlock;
+                StartMenuItem selectedItemInfo = (apps.SelectedItem as TextBlock).Tag as StartMenuItem;
 
-                if (selectedItem.Tag as string == "Normal")
-                {
-                    Process.Start(new ProcessStartInfo(selectedItem.Name) { UseShellExecute = true });
-                }
+                if (selectedItemInfo.ItemKind == ApplicationKind.Normal)
+                    Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
                 else
                 {
                     PackageManager packageManager = new PackageManager();
@@ -214,7 +212,7 @@ namespace Windows_Mobile
 
                     foreach (Windows.ApplicationModel.Package package in packages)
                     {
-                        if (package.Id.Name == selectedItem.Name)
+                        if (package.Id.Name == selectedItemInfo.ItemStartURI)
                         {
                             IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
 
