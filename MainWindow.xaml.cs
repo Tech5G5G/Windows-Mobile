@@ -38,6 +38,8 @@ using System.Windows.Interop;
 using System.Drawing.Imaging;
 using System.Drawing;
 using Windows_Mobile;
+using System.Linq.Expressions;
+using System.Windows.Forms;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -56,6 +58,7 @@ namespace Windows_Mobile
         public string ItemName { get; set;  }
         public ApplicationKind ItemKind { get; set; }
         public string ItemStartURI { get; set; }
+        public BitmapImage Icon { get; set; }
     }
 
     public sealed partial class MainWindow : Window
@@ -72,7 +75,7 @@ namespace Windows_Mobile
             IndexStartMenuItems();
         }
 
-        private void IndexStartMenuItems()
+        private async void IndexStartMenuItems()
         {
             string userItemsDirectory = "C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs";
 
@@ -100,15 +103,41 @@ namespace Windows_Mobile
                     FileInfo file = new FileInfo(item);
                     string name = file.Name.Replace(file.Extension, string.Empty);
 
+                    //Test code
+                    BitmapImage bitmapImage = new BitmapImage();
+                    var shellFile = ShellFile.FromFilePath(item);
+                    string targetURI = shellFile.Properties.System.Link.TargetParsingPath.Value;
+
+                    try
+                    {
+                        Bitmap bitmap = Icon.ExtractAssociatedIcon(item).ToBitmap();
+
+                        using (MemoryStream stream = new MemoryStream())
+                        {
+                            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            stream.Position = 0;
+                            bitmapImage.SetSource(stream.AsRandomAccessStream());
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        using (MemoryStream stream = new MemoryStream())
+                        {
+                            shellFile.Thumbnail.ExtraLargeBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            stream.Position = 0;
+                            bitmapImage.SetSource(stream.AsRandomAccessStream());
+                        }
+                    }
+
                     var MenuItem = new StartMenuItem();
                     MenuItem.ItemName = name;
                     MenuItem.ItemStartURI = item;
                     MenuItem.ItemKind = ApplicationKind.Normal;
+                    MenuItem.Icon = bitmapImage;
 
                     allApps.Add(new TextBlock() { Text = name, Tag = MenuItem });
                 }
             }
-
 
             string systemItemsDirectory = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs";
 
@@ -136,10 +165,37 @@ namespace Windows_Mobile
                     FileInfo file = new FileInfo(item);
                     string name = file.Name.Replace(file.Extension, string.Empty);
 
+                    //Test code
+                    BitmapImage bitmapImage = new BitmapImage();
+                    var shellFile = ShellFile.FromFilePath(item);
+                    string targetURI = shellFile.Properties.System.Link.TargetParsingPath.Value;
+
+                    try
+                    {
+                        Bitmap bitmap = Icon.ExtractAssociatedIcon(item).ToBitmap();
+
+                        using (MemoryStream stream = new MemoryStream())
+                        {
+                            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            stream.Position = 0;
+                            bitmapImage.SetSource(stream.AsRandomAccessStream());
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        using (MemoryStream stream = new MemoryStream())
+                        {
+                            shellFile.Thumbnail.ExtraLargeBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            stream.Position = 0;
+                            bitmapImage.SetSource(stream.AsRandomAccessStream());
+                        }
+                    }
+
                     var MenuItem = new StartMenuItem();
                     MenuItem.ItemName = name;
                     MenuItem.ItemStartURI = item;
                     MenuItem.ItemKind = ApplicationKind.Normal;
+                    MenuItem.Icon = bitmapImage;
 
                     allApps.Add(new TextBlock() { Text = name, Tag = MenuItem });
                 }
@@ -157,16 +213,21 @@ namespace Windows_Mobile
 
                     foreach (AppListEntry appListEntry in appListEntries)
                     {
+                        var logo = appListEntry.DisplayInfo.GetLogo(new Windows.Foundation.Size(3000, 3000));
+                        var stream = await logo.OpenReadAsync();
+                        var image = new BitmapImage();
+                        image.SetSource(stream);
+
                         var MenuItem = new StartMenuItem();
                         MenuItem.ItemName = appListEntry.DisplayInfo.DisplayName;
                         MenuItem.ItemStartURI = package.Id.Name;
                         MenuItem.ItemKind = ApplicationKind.Packaged;
+                        MenuItem.Icon = image;
 
                         allApps.Add(new TextBlock() { Text = appListEntry.DisplayInfo.DisplayName, Tag = MenuItem });
                     }
                 }
             }
-
 
             var ordered = from item in allApps
                            orderby item.Text.Substring(0, 1)
@@ -202,6 +263,11 @@ namespace Windows_Mobile
             if (apps.SelectedItem is not null)
             {
                 StartMenuItem selectedItemInfo = (apps.SelectedItem as TextBlock).Tag as StartMenuItem;
+
+                if (selectedItemInfo.Icon is not null)
+                {
+                    iconImage.Source = selectedItemInfo.Icon;
+                }
 
                 if (selectedItemInfo.ItemKind == ApplicationKind.Normal)
                     Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });

@@ -57,5 +57,6 @@
                 </ToggleButton>
             </StackPanel>
         </Grid>
+        <Image x:Name="iconImage" Width="30" />
     </Grid>
 </Window>
