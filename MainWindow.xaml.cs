@@ -26,7 +26,6 @@ using System.Text.RegularExpressions;
 using Windows.Networking;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
-using System.IO.Packaging;
 using Windows.Management.Deployment;
 using System.Net.Http.Headers;
 using System.Security.Principal;
@@ -40,6 +39,8 @@ using System.Drawing;
 using Windows_Mobile;
 using System.Linq.Expressions;
 using System.Windows.Forms;
+using Windows.ApplicationModel;
+using System.Runtime.CompilerServices;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -68,24 +69,97 @@ namespace Windows_Mobile
             this.InitializeComponent();
 
             Title = "Windows Mobile";
-            this.AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
+            AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
 
-            IndexStartMenuItems();
+            IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs");
+            IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs");
+            IndexPackagedApps();
+            AddAppsToStartMenu();
         }
 
-        private async void IndexStartMenuItems()
+        private static Icon Extract(string file, int number, bool largeIcon)
         {
-            string userItemsDirectory = "C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs";
+            var outInt = ExtractIconEx(file, number, out IntPtr large, out IntPtr small, 1);
+            try
+            {
+                return Icon.FromHandle(largeIcon ? large : small);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+        public static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
 
+        private static string[] IndexFolder(string folderPath)
+        {
+            string[] files = Directory.GetFiles(folderPath);
+
+            string[] subDirectories = Directory.GetDirectories(folderPath);
+            if (subDirectories.Length != 0)
+            {
+                foreach (string directory in subDirectories)
+                {
+                    string[] subfiles = IndexFolder(directory);
+                    foreach (string subfile in subfiles)
+                        files = [.. files, subfile];
+                }
+            }
+
+            return files;
+        }
+
+        private void IndexPackagedApps()
+        {
+            PackageManager packageManager = new();
+            IEnumerable<Package> packages = packageManager.FindPackagesForUser(string.Empty);
+
+            foreach (Package package in packages)
+            {
+                if (!package.IsResourcePackage && !package.IsFramework && !package.IsStub && !package.IsBundle && package.GetAppListEntries().FirstOrDefault() != null)
+                {
+                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
+
+                    foreach (AppListEntry appListEntry in appListEntries)
+                    {
+                        var MenuItem = new StartMenuItem()
+                        {
+                            ItemName = appListEntry.DisplayInfo.DisplayName,
+                            ItemStartURI = package.Id.FullName,
+                            ItemKind = ApplicationKind.Packaged,
+                            Icon = new BitmapImage() { UriSource = package.Logo }
+                        };
+
+                        allApps.Add(MenuItem);
+                    }
+                }
+            }
+        }
+
+        private void AddAppsToStartMenu()
+        {
+            var ordered = from item in allApps orderby item.ItemName[..1] select item;
+            var orderedList = ordered.ToList();
+            allApps.Clear();
+
+            foreach (StartMenuItem item in orderedList)
+            {
+                allApps.Add(item);
+                appsList.Add(item);
+            }
+        }
+
+        private void IndexStartMenuFolder(string userItemsDirectory)
+        {
             IEnumerable<string> userStartMenuItems = Directory.EnumerateFiles(userItemsDirectory);
             string[] userStartMenuFolders = Directory.GetDirectories(userItemsDirectory);
 
             foreach (string folder in userStartMenuFolders)
             {
-                //Replace GetFiles with something that gets all files (including in subdirectories)
-                string[] folderItems = Directory.GetFiles(folder);
+                string[] folderItems = IndexFolder(folder);
 
                 if (folderItems.Length == 1)
                 {
@@ -94,148 +168,79 @@ namespace Windows_Mobile
                         userStartMenuItems = userStartMenuItems.Append(item);
                     }
                 }
+                else
+                {
+                    userStartMenuItems = userStartMenuItems.Append(folder);
+                }
             }
 
             foreach (string item in userStartMenuItems)
             {
                 if (!item.EndsWith(".ini"))
                 {
-                    FileInfo file = new FileInfo(item);
-                    string name = file.Name.Replace(file.Extension, string.Empty);
-
-                    //Test code
-                    BitmapImage bitmapImage = new BitmapImage();
-                    var shellFile = ShellFile.FromFilePath(item);
-                    string targetURI = shellFile.Properties.System.Link.TargetParsingPath.Value;
-
-                    try
+                    if (File.Exists(item))
                     {
-                        Bitmap bitmap = Icon.ExtractAssociatedIcon(item).ToBitmap();
+                        FileInfo file = new(item);
+                        string name = file.Name.Replace(file.Extension, string.Empty);
 
-                        using (MemoryStream stream = new MemoryStream())
+                        BitmapImage bitmapImage = new();
+                        var shellFile = ShellFile.FromFilePath(item);
+
+                        try
                         {
-                            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            string path = shellFile.Properties.System.Link.TargetParsingPath.Value switch
+                            {
+                                "File Explorer" => @"C:\Windows\explorer.exe",
+                                "Run" => "run icon location",
+                                _ => shellFile.Properties.System.Link.TargetParsingPath.Value
+                            };
+
+                            Bitmap bitmap;
+                            var icon = Extract(path, 0, true);
+                            if (icon is not null)
+                                bitmap = icon.ToBitmap();
+                            else
+                                bitmap = Icon.ExtractAssociatedIcon(item).ToBitmap();
+                            using MemoryStream stream = new();
+                            bitmap.Save(stream, ImageFormat.Png);
                             stream.Position = 0;
                             bitmapImage.SetSource(stream.AsRandomAccessStream());
                         }
-                    }
-                    catch (Exception)
-                    {
-                        using (MemoryStream stream = new MemoryStream())
+                        catch (Exception)
                         {
-                            shellFile.Thumbnail.ExtraLargeBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            using MemoryStream stream = new();
+                            shellFile.Thumbnail.ExtraLargeBitmap.Save(stream, ImageFormat.Png);
                             stream.Position = 0;
                             bitmapImage.SetSource(stream.AsRandomAccessStream());
                         }
-                    }
 
-                    var MenuItem = new StartMenuItem();
-                    MenuItem.ItemName = name;
-                    MenuItem.ItemStartURI = item;
-                    MenuItem.ItemKind = ApplicationKind.Normal;
-                    MenuItem.Icon = bitmapImage;
-
-                    allApps.Add(new TextBlock() { Text = name, Tag = MenuItem });
-                }
-            }
-
-            string systemItemsDirectory = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs";
-
-            IEnumerable<string> systemStartMenuItems = Directory.EnumerateFiles(systemItemsDirectory);
-            string[] systemStartMenuFolders = Directory.GetDirectories(systemItemsDirectory);
-
-            foreach (string folder in systemStartMenuFolders)
-            {
-                //Replace GetFiles with something that gets all files (including in subdirectories)
-                string[] folderItems = Directory.GetFiles(folder);
-
-                if (folderItems.Length == 1)
-                {
-                    foreach (string item in folderItems)
-                    {
-                        systemStartMenuItems = systemStartMenuItems.Append(item);
-                    }
-                }
-            }
-
-            foreach (string item in systemStartMenuItems)
-            {
-                if (!item.EndsWith(".ini"))
-                {
-                    FileInfo file = new FileInfo(item);
-                    string name = file.Name.Replace(file.Extension, string.Empty);
-
-                    //Test code
-                    BitmapImage bitmapImage = new BitmapImage();
-                    var shellFile = ShellFile.FromFilePath(item);
-                    string targetURI = shellFile.Properties.System.Link.TargetParsingPath.Value;
-
-                    try
-                    {
-                        Bitmap bitmap = Icon.ExtractAssociatedIcon(item).ToBitmap();
-
-                        using (MemoryStream stream = new MemoryStream())
+                        var MenuItem = new StartMenuItem()
                         {
-                            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                            stream.Position = 0;
-                            bitmapImage.SetSource(stream.AsRandomAccessStream());
-                        }
+                            ItemName = name,
+                            ItemStartURI = item,
+                            ItemKind = ApplicationKind.Normal,
+                            Icon = bitmapImage
+                        };
+
+                        allApps.Add(MenuItem);
                     }
-                    catch (Exception)
+                    else
                     {
-                        using (MemoryStream stream = new MemoryStream())
+                        DirectoryInfo directory = new(item);
+                        string name = directory.Name;
+                        BitmapImage bitmapImage = new() { UriSource = new Uri("ms-appx:///Assets/FolderIcon.png") };
+
+                        var MenuItem = new StartMenuItem()
                         {
-                            shellFile.Thumbnail.ExtraLargeBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                            stream.Position = 0;
-                            bitmapImage.SetSource(stream.AsRandomAccessStream());
-                        }
-                    }
+                            ItemName = name,
+                            ItemStartURI = item,
+                            ItemKind = ApplicationKind.Normal,
+                            Icon = bitmapImage
+                        };
 
-                    var MenuItem = new StartMenuItem();
-                    MenuItem.ItemName = name;
-                    MenuItem.ItemStartURI = item;
-                    MenuItem.ItemKind = ApplicationKind.Normal;
-                    MenuItem.Icon = bitmapImage;
-
-                    allApps.Add(new TextBlock() { Text = name, Tag = MenuItem });
-                }
-            }
-
-
-            PackageManager packageManager = new PackageManager();
-            IEnumerable<Windows.ApplicationModel.Package> packages = packageManager.FindPackagesForUser(string.Empty);
-
-            foreach (Windows.ApplicationModel.Package package in packages)
-            {
-                if (!package.IsResourcePackage && !package.IsFramework && !package.IsStub && !package.IsBundle)
-                {
-                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-
-                    foreach (AppListEntry appListEntry in appListEntries)
-                    {
-                        var logo = appListEntry.DisplayInfo.GetLogo(new Windows.Foundation.Size(3000, 3000));
-                        var stream = await logo.OpenReadAsync();
-                        var image = new BitmapImage();
-                        image.SetSource(stream);
-
-                        var MenuItem = new StartMenuItem();
-                        MenuItem.ItemName = appListEntry.DisplayInfo.DisplayName;
-                        MenuItem.ItemStartURI = package.Id.Name;
-                        MenuItem.ItemKind = ApplicationKind.Packaged;
-                        MenuItem.Icon = image;
-
-                        allApps.Add(new TextBlock() { Text = appListEntry.DisplayInfo.DisplayName, Tag = MenuItem });
+                        allApps.Add(MenuItem);
                     }
                 }
-            }
-
-            var ordered = from item in allApps
-                           orderby item.Text.Substring(0, 1)
-                           select item;
-
-            foreach (TextBlock item in ordered)
-            {
-                apps.Items.Add(item);
             }
         }
 
@@ -244,86 +249,58 @@ namespace Windows_Mobile
             startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
         }
 
-        private void TaskView_Click(object sender, RoutedEventArgs e)
-        {
-            if (taskViewBackground.Opacity == 1)
-            {
-                taskViewBackground.Visibility = Visibility.Collapsed;
-                taskViewBackground.Opacity = 0;
-            }
-            else
-            {
-                taskViewBackground.Visibility = Visibility.Visible;
-                taskViewBackground.Opacity = 1;
-            }
-        }
+        private void TaskView_Click(object sender, RoutedEventArgs e) => taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
-        private void apps_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Apps_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (apps.SelectedItem is not null)
             {
-                StartMenuItem selectedItemInfo = (apps.SelectedItem as TextBlock).Tag as StartMenuItem;
-
-                if (selectedItemInfo.Icon is not null)
-                {
-                    iconImage.Source = selectedItemInfo.Icon;
-                }
+                var selectedItemInfo = apps.SelectedItem as StartMenuItem;
 
                 if (selectedItemInfo.ItemKind == ApplicationKind.Normal)
                     Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
                 else
                 {
-                    PackageManager packageManager = new PackageManager();
-                    IEnumerable<Windows.ApplicationModel.Package> packages = packageManager.FindPackagesForUser(string.Empty);
+                    PackageManager packageManager = new();
+                    Package package = packageManager.FindPackageForUser(string.Empty, selectedItemInfo.ItemStartURI);
 
-                    foreach (Windows.ApplicationModel.Package package in packages)
-                    {
-                        if (package.Id.Name == selectedItemInfo.ItemStartURI)
-                        {
-                            IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-
-                            foreach (AppListEntry appListEntry in appListEntries)
-                            {
-                                appListEntry.LaunchAsync();
-                            }
-                        }
-                    }
+                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
+                    appListEntries[0].LaunchAsync();
                 }
             }
         }
 
-        Collection<TextBlock> allApps = new();
+        ObservableCollection<StartMenuItem> allApps = [];
+        ObservableCollection<StartMenuItem> appsList = [];
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            var filteredUnordered = allApps.Where(textBlock => Filter(textBlock, sender.Text));
+            var filteredUnordered = allApps.Where(entry => Filter(entry, sender.Text));
 
-            var filtered = from item in filteredUnordered
-                        orderby item.Text.Substring(0, 1)
-                        select item;
+            var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
 
-            for (int i = apps.Items.Count - 1; i >= 0; i--)
+            for (int i = appsList.Count - 1; i >= 0; i--)
             {
-                var item = apps.Items[i];
+                var item = appsList[i];
 
                 if (!filtered.Contains(item))
                 {
-                    apps.Items.Remove(item);
+                    appsList.Remove(item);
                 }
             }
 
-            foreach (TextBlock item in filtered)
+            foreach (StartMenuItem item in filtered)
             {
-                if (!apps.Items.Contains(item))
+                if (!appsList.Contains(item))
                 {
-                    apps.Items.Add(item);
+                    appsList.Add(item);
                 }
             }
         }
 
-        private bool Filter(TextBlock textBlock, string filter)
+        private bool Filter(StartMenuItem entry, string filter)
         {
-            return textBlock.Text.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
+            return entry.ItemName.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

@@ -7,33 +7,50 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
     mc:Ignorable="d">
-
     <Grid>
         <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Rectangle.Fill>
                 <ImageBrush Stretch="UniformToFill" x:Name="wallpaperImage" />
             </Rectangle.Fill>
         </Rectangle>
-        <StackPanel x:Name="startMenu" Margin="0,0,0,80" VerticalAlignment="Bottom" Translation="0,900,40" CornerRadius="8" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Height="800" Width="700">
-            <StackPanel.Shadow>
+        <Grid x:Name="startMenu" Margin="0,10,0,80" Height="725" VerticalAlignment="Bottom" Translation="0,900,40" CornerRadius="8" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Width="700">
+            <Grid.Shadow>
                 <ThemeShadow />
-            </StackPanel.Shadow>
-            <StackPanel Height="735" VerticalAlignment="Top" Background="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource AccentControlElevationBorderBrush}">
-                <AutoSuggestBox Height="40" FontSize="15" VerticalContentAlignment="Center" PlaceholderText="Search apps" QueryIcon="Find" TextChanged="AutoSuggestBox_TextChanged" />
-                <ListView x:Name="apps" Height="695" SelectionChanged="apps_SelectionChanged" />
-            </StackPanel>
-            <StackPanel.TranslationTransition>
+            </Grid.Shadow>
+            <Grid Margin="0,0,0,60" VerticalAlignment="Stretch" Background="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource AccentControlElevationBorderBrush}">
+                <Grid.Resources>
+                    <DataTemplate x:Key="StartMenuItemTemplate" x:DataType="local:StartMenuItem">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Image Source="{x:Bind Icon}" Height="24" Width="24" />
+                            <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </Grid.Resources>
+                <AutoSuggestBox Height="40" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search apps" QueryIcon="Find" TextChanged="AutoSuggestBox_TextChanged" />
+                <ListView x:Name="apps" Padding="0,3" ItemsSource="{x:Bind appsList}" ItemTemplate="{StaticResource StartMenuItemTemplate}" Margin="0,40,0,0" VerticalAlignment="Stretch" SelectionChanged="Apps_SelectionChanged" />
+            </Grid>
+            <Grid.TranslationTransition>
                 <Vector3Transition />
-            </StackPanel.TranslationTransition>
-        </StackPanel>
+            </Grid.TranslationTransition>
+        </Grid>
         <Rectangle x:Name="taskViewBackground" Visibility="Collapsed" Opacity="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <Rectangle.OpacityTransition>
-                <ScalarTransition />
-            </Rectangle.OpacityTransition>
             <Rectangle.Fill>
                 <AcrylicBrush TintColor="#F3F3F3" TintOpacity="0.0" FallbackColor="Transparent" />
             </Rectangle.Fill>
+            <animations:Implicit.HideAnimations>
+                <animations:OpacityAnimation Duration="0:0:0.5" From="0" To="1">
+                    <animations:ScalarKeyFrame Key="0" Value="1" />
+                    <animations:ScalarKeyFrame Key="1" Value="0" />
+                </animations:OpacityAnimation>
+            </animations:Implicit.HideAnimations>
+            <animations:Implicit.ShowAnimations>
+                <animations:OpacityAnimation Duration="0:0:0.5" From="0" To="1">
+                    <animations:ScalarKeyFrame Key="0" Value="0" />
+                    <animations:ScalarKeyFrame Key="1" Value="1" />
+                </animations:OpacityAnimation>
+            </animations:Implicit.ShowAnimations>
         </Rectangle>
         <Grid Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Height="70" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -57,6 +74,5 @@
                 </ToggleButton>
             </StackPanel>
         </Grid>
-        <Image x:Name="iconImage" Width="30" />
     </Grid>
 </Window>
