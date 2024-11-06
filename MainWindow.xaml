@@ -37,8 +37,19 @@
                         </StackPanel>
                     </DataTemplate>
                 </Grid.Resources>
-                <AutoSuggestBox Height="40" FontSize="15" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search apps" QueryIcon="Find" TextChanged="AutoSuggestBox_TextChanged" />
-                <ListView x:Name="apps" Padding="0,3" ItemsSource="{x:Bind appsList}" ItemTemplate="{StaticResource StartMenuItemTemplate}" Margin="0,40,0,0" VerticalAlignment="Stretch" SelectionChanged="Apps_SelectionChanged" />
+                <AutoSuggestBox x:Name="autoSuggestBox" Height="40" FontSize="15" Margin="12" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search games" QueryIcon="Find" TextChanged="AutoSuggestBox_TextChanged" />
+                <NavigationView x:Name="startNV" Margin="0,64,0,0" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" SelectionChanged="NavigationView_SelectionChanged" PaneDisplayMode="Top">
+                    <NavigationView.MenuItems>
+                        <NavigationViewItem Content="Games" x:Name="games_NavItem" />
+                        <NavigationViewItem Content="Launchers" x:Name="launchers_NavItem" />
+                        <NavigationViewItem Content="Apps" x:Name="apps_NavItem" />
+                    </NavigationView.MenuItems>
+                    <NavigationView.Resources>
+                        <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
+                        <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
+                    </NavigationView.Resources>
+                    <ListView x:Name="apps" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" Padding="0,0,0,3" ItemTemplate="{StaticResource StartMenuItemTemplate}" VerticalAlignment="Stretch" />
+                </NavigationView>
             </Grid>
             <Grid.TranslationTransition>
                 <Vector3Transition />
