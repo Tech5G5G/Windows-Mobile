@@ -55,9 +55,13 @@ namespace Windows_Mobile
 {
     public enum ApplicationKind
     {
-        Normal = 1,
-
-        Packaged = 2
+        Normal,
+        SteamGame,
+        EpicGamesGame,
+        XboxGame,
+        Launcher,
+        LauncherPackaged,
+        Packaged
     }
 
     public class StartMenuItem
