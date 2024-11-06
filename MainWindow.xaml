@@ -25,6 +25,15 @@
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Image Source="{x:Bind Icon}" Height="24" Width="24" />
                             <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
+                            <StackPanel.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE7EF;}" Text="Run as administrator" />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xED43;}" Text="Open file location" />
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE713;}" Text="App settings" />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE74D;}" Text="Uninstall" />
+                                </MenuFlyout>
+                            </StackPanel.ContextFlyout>
                         </StackPanel>
                     </DataTemplate>
                 </Grid.Resources>
