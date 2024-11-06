@@ -23,7 +23,7 @@
                 <Grid.Resources>
                     <DataTemplate x:Key="StartMenuItemTemplate" x:DataType="local:StartMenuItem">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Image Source="{x:Bind Icon}" Height="24" Width="24" />
+                            <Image Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
                             <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
                             <StackPanel.ContextFlyout>
                                 <MenuFlyout>
