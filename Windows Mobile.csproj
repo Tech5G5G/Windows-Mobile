@@ -13,6 +13,7 @@
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Placeholder.png" />
     <None Remove="Assets\StartMenuIcon.png" />
   </ItemGroup>
 
