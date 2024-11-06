@@ -94,5 +94,27 @@
                 </ToggleButton>
             </StackPanel>
         </Grid>
+        <Grid Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Margin="8" Height="54" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ToggleButton Click="StartMenu_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Start" Height="44" Width="44" Content="{ui:BitmapIcon Source=Assets/StartMenuIcon.png}">
+                    <ToggleButton.Resources>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{ThemeResource ControlFillColorDefault}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{ThemeResource ControlFillColorSecondary}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{ThemeResource ControlFillColorTertiary}" />
+                    </ToggleButton.Resources>
+                </ToggleButton>
+                <ToggleButton Click="TaskView_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Task view" Height="44" Width="44" Content="{ui:FontIcon FontSize=38, Glyph=&#xE7C4;}">
+                    <ToggleButton.Resources>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{ThemeResource ControlFillColorDefault}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{ThemeResource ControlFillColorSecondary}" />
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{ThemeResource ControlFillColorTertiary}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="{ThemeResource TextFillColorPrimary}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="{ThemeResource TextFillColorPrimary}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="{ThemeResource TextFillColorSecondary}" />
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedDisabled" Color="{ThemeResource TextFillColorDisabled}" />
+                    </ToggleButton.Resources>
+                </ToggleButton>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
