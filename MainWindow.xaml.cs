@@ -40,7 +40,13 @@ using Windows_Mobile;
 using System.Linq.Expressions;
 using System.Windows.Forms;
 using Windows.ApplicationModel;
-using System.Runtime.CompilerServices;
+using craftersmine.SteamGridDBNet;
+using NexusMods.Paths;
+using GameFinder.StoreHandlers.Steam.Services;
+using Windows_Mobile.Helpers;
+using Gameloop.Vdf;
+using Gameloop.Vdf.JsonConverter;
+using System.Text.Json;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
