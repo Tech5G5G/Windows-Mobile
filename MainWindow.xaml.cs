@@ -91,11 +91,14 @@ namespace Windows_Mobile
 
         private async Task PopulateStartMenu()
         {
-            //Test code
+            var egsHandler = new GameFinder.StoreHandlers.EGS.EGSHandler(OperatingSystem.IsWindows() ? GameFinder.RegistryUtils.WindowsRegistry.Shared : null, FileSystem.Shared);
+            var eGames = egsHandler.FindAllGames();
+
+            var xhandler = new GameFinder.StoreHandlers.Xbox.XboxHandler(FileSystem.Shared);
+            var xgames = xhandler.FindAllGames();
+
             var handler = new GameFinder.StoreHandlers.Steam.SteamHandler(FileSystem.Shared, OperatingSystem.IsWindows() ? GameFinder.RegistryUtils.WindowsRegistry.Shared : null);
             var games = handler.FindAllGames();
-            foreach (var game in games)
-                Debug.WriteLine((game.Value as GameFinder.StoreHandlers.Steam.SteamGame).Name);
             
             await IndexEGSGames();
             await IndexSteamGames();
