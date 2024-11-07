@@ -91,6 +91,12 @@ namespace Windows_Mobile
 
         private async Task PopulateStartMenu()
         {
+            //Test code
+            var handler = new GameFinder.StoreHandlers.Steam.SteamHandler(FileSystem.Shared, OperatingSystem.IsWindows() ? GameFinder.RegistryUtils.WindowsRegistry.Shared : null);
+            var games = handler.FindAllGames();
+            foreach (var game in games)
+                Debug.WriteLine((game.Value as GameFinder.StoreHandlers.Steam.SteamGame).Name);
+            
             await IndexEGSGames();
             await IndexSteamGames();
             await IndexPackagedApps();
