@@ -27,6 +27,7 @@ public enum ApplicationKind
     Normal,
     SteamGame,
     EpicGamesGame,
+    GOGGame,
     XboxGame,
     Launcher,
     LauncherPackaged,
