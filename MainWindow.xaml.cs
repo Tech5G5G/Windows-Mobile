@@ -177,21 +177,6 @@ namespace Windows_Mobile
 
         private SteamGridDb db;
 
-        private static Icon Extract(string file, int number, bool largeIcon)
-        {
-            var outInt = ExtractIconEx(file, number, out IntPtr large, out IntPtr small, 1);
-            try
-            {
-                return Icon.FromHandle(largeIcon ? large : small);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-        public static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
-
         private static string[] IndexFolder(string folderPath)
         {
             string[] files = Directory.GetFiles(folderPath);
