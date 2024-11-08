@@ -30,26 +30,6 @@ using craftersmine.SteamGridDBNet.Exceptions;
 
 namespace Windows_Mobile
 {
-    public enum ApplicationKind
-    {
-        Normal,
-        SteamGame,
-        EpicGamesGame,
-        XboxGame,
-        Launcher,
-        LauncherPackaged,
-        Packaged
-    }
-
-    public class StartMenuItem
-    {
-        public string ItemName { get; set;  }
-        public ApplicationKind ItemKind { get; set; }
-        public string ItemStartURI { get; set; }
-        public BitmapImage Icon { get; set; }
-        public SteamGridDbGame GameInfo { get; set; }
-    }
-
     public sealed partial class MainWindow : Window
     {
         public MainWindow()
