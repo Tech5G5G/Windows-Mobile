@@ -408,7 +408,7 @@ namespace Windows_Mobile
                             _ => targetPath
                         };
 
-                        var icon = Extract(path, number, true);
+                        var icon = App.ExtractIcon(path, number, true);
                         Bitmap bitmap = icon is not null ? icon.ToBitmap() : Icon.ExtractAssociatedIcon(item).ToBitmap();
                         using MemoryStream stream = new();
                         bitmap.Save(stream, ImageFormat.Png);
