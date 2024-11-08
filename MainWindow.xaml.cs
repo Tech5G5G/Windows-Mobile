@@ -90,54 +90,46 @@ namespace Windows_Mobile
 
         private async Task IndexSteamGames()
         {
-            var fs = new InMemoryFileSystem();
-            var steamPath = SteamLocationFinder.GetDefaultSteamInstallationPaths(fs).First();
-            if (Directory.Exists(steamPath.GetFullPath() + "\\steamapps\\"))
+            var handler = new SteamHandler(FileSystem.Shared, WindowsRegistry.Shared);
+            var games = handler.FindAllGames();
+            foreach (var game in games)
             {
-                var apps = Directory.GetFiles(steamPath.GetFullPath() + "\\steamapps\\");
-                foreach (string app in apps)
+                var steamGame = game.Value as SteamGame;
+                if (steamGame.AppId.Value != 228980) 
                 {
-                    if (app.EndsWith(".acf"))
-                    {
-                        var appInfo = VdfConvert.Deserialize(File.ReadAllText(app)).Value.ToJson().ToObject<SteamGameInfo>();
-                        if (appInfo.appid != "228980")
-                        {
-                            SteamGridDbGame game = null;
+                    SteamGridDbGame gameInfo = null;
                             BitmapImage bitmapImage = new();
                             try
                             {
-                                game = await db.GetGameBySteamIdAsync(int.Parse(appInfo.appid));
+                        gameInfo = await db.GetGameBySteamIdAsync((int)steamGame.AppId.Value);
                             }
-                            catch (craftersmine.SteamGridDBNet.Exceptions.SteamGridDbNotFoundException)
+                    catch (SteamGridDbNotFoundException)
                             {
-                                game = (await db.SearchForGamesAsync(appInfo.name)).First();
+                        gameInfo = (await db.SearchForGamesAsync(steamGame.Name)).First();
                             }
-                            var image = await db.GetIconsForGameAsync(game);
+
+                    var image = await db.GetIconsForGameAsync(gameInfo);
                             if (image.Length != 0)
                                 bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
                             else
                             {
                                 using var stream = new MemoryStream();
-                                Icon.ExtractAssociatedIcon(Directory.GetFiles(steamPath.GetFullPath() + "\\steamapps\\common\\" + appInfo.installdir).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
+                        Icon.ExtractAssociatedIcon(Directory.GetFiles(steamGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
                                 stream.Position = 0;
                                 bitmapImage.SetSource(stream.AsRandomAccessStream());
                             }
 
                             var MenuItem = new StartMenuItem()
                             {
-                                ItemName = appInfo.name,
-                                ItemStartURI = "steam://rungameid/" + appInfo.appid,
+                        ItemName = steamGame.Name,
+                        ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
                                 ItemKind = ApplicationKind.SteamGame,
                                 Icon = bitmapImage,
-                                GameInfo = game
+                        GameInfo = gameInfo
                             };
                             allApps.Add(MenuItem);
                         }
                     }
-                }
-            }
-            else
-                return;
         }
 
         private async Task IndexEGSGames()
