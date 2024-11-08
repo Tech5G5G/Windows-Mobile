@@ -72,13 +72,6 @@ namespace Windows_Mobile
             var gogHandler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
             var gogGames = gogHandler.FindAllGames();
 
-            var xhandler = new GameFinder.StoreHandlers.Xbox.XboxHandler(FileSystem.Shared);
-            var xgames = xhandler.FindAllGames();
-
-            var handler = new GameFinder.StoreHandlers.Steam.SteamHandler(FileSystem.Shared, OperatingSystem.IsWindows() ? GameFinder.RegistryUtils.WindowsRegistry.Shared : null);
-            var games = handler.FindAllGames();
-            
-            await IndexEGSGames();
             await IndexSteamGames();
             await IndexEGSGames();
             //await IndexEAGames();
