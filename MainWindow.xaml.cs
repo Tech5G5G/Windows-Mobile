@@ -80,6 +80,8 @@ namespace Windows_Mobile
             
             await IndexEGSGames();
             await IndexSteamGames();
+            await IndexEGSGames();
+            //await IndexEAGames();
             await IndexPackagedApps();
             IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs");
             IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs");
@@ -174,6 +176,41 @@ namespace Windows_Mobile
             else
                 return;
         }
+
+        //private async Task IndexEAGames()
+        //{
+        //    var eHandler = new EADesktopHandler(FileSystem.Shared, new HardwareInfoProvider());
+        //    var eGames = eHandler.FindAllGames();
+        //    foreach (var game in eGames)
+        //    {
+        //        var eGame = game.Value as EADesktopGame;
+        //        SteamGridDbGame gameInfo = null;
+        //        BitmapImage bitmapImage = new();
+
+        //        gameInfo = (await db.SearchForGamesAsync(eGame.BaseSlug)).First();
+
+        //        var image = await db.GetIconsForGameAsync(gameInfo);
+        //        if (image.Length != 0)
+        //            bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
+        //        else
+        //        {
+        //            using var stream = new MemoryStream();
+        //            Icon.ExtractAssociatedIcon(Directory.GetFiles(eGame.BaseInstallPath.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
+        //            stream.Position = 0;
+        //            bitmapImage.SetSource(stream.AsRandomAccessStream());
+        //        }
+
+        //        var MenuItem = new StartMenuItem()
+        //        {
+        //            ItemName = eGame.BaseSlug,
+        //            ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
+        //            ItemKind = ApplicationKind.SteamGame,
+        //            Icon = bitmapImage,
+        //            GameInfo = gameInfo
+        //        };
+        //        allApps.Add(MenuItem);
+        //    }
+        //}
 
         private SteamGridDb db;
 
