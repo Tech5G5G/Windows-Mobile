@@ -1,20 +1,13 @@
 using System.Xml.Serialization;
 
 //Custom types for retriving data
-namespace Windows_Mobile.Helpers;
+namespace Windows_Mobile.Types;
 
 [XmlRoot("Game")]
 public class Game
 {
     [XmlElement("StoreId")]
     public string StoreId { get; set; }
-}
-
-public class SteamGameInfo
-{
-    public string appid { get; set; }
-    public string name { get; set; }
-    public string installdir { get; set; }
 }
 
 public class EGSGameInfo
