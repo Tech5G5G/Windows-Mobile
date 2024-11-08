@@ -49,12 +49,10 @@ namespace Windows_Mobile
 
         private async Task PopulateStartMenu()
         {
-            var gogHandler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
-            var gogGames = gogHandler.FindAllGames();
-
             await IndexSteamGames();
             await IndexEGSGames();
             //await IndexEAGames();
+            await IndexGOGGames();
             await IndexPackagedApps();
             IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs");
             IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs");
@@ -71,38 +69,38 @@ namespace Windows_Mobile
                 if (steamGame.AppId.Value != 228980) 
                 {
                     SteamGridDbGame gameInfo = null;
-                            BitmapImage bitmapImage = new();
-                            try
-                            {
+                    BitmapImage bitmapImage = new();
+                    try
+                    {
                         gameInfo = await db.GetGameBySteamIdAsync((int)steamGame.AppId.Value);
-                            }
+                    }
                     catch (SteamGridDbNotFoundException)
-                            {
+                    {
                         gameInfo = (await db.SearchForGamesAsync(steamGame.Name)).First();
-                            }
+                    }
 
                     var image = await db.GetIconsForGameAsync(gameInfo);
-                            if (image.Length != 0)
-                                bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
-                            else
-                            {
-                                using var stream = new MemoryStream();
+                    if (image.Length != 0)
+                        bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
+                    else
+                    {
+                        using var stream = new MemoryStream();
                         Icon.ExtractAssociatedIcon(Directory.GetFiles(steamGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
-                                stream.Position = 0;
-                                bitmapImage.SetSource(stream.AsRandomAccessStream());
-                            }
+                        stream.Position = 0;
+                        bitmapImage.SetSource(stream.AsRandomAccessStream());
+                    }
 
-                            var MenuItem = new StartMenuItem()
-                            {
+                    var MenuItem = new StartMenuItem()
+                    {
                         ItemName = steamGame.Name,
                         ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
-                                ItemKind = ApplicationKind.SteamGame,
-                                Icon = bitmapImage,
+                        ItemKind = ApplicationKind.SteamGame,
+                        Icon = bitmapImage,
                         GameInfo = gameInfo
-                            };
-                            allApps.Add(MenuItem);
-                        }
-                    }
+                    };
+                    allApps.Add(MenuItem);
+                }
+            }
         }
 
         private async Task IndexEGSGames()
@@ -169,13 +167,46 @@ namespace Windows_Mobile
         //        {
         //            ItemName = eGame.BaseSlug,
         //            ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
-        //            ItemKind = ApplicationKind.SteamGame,
+        //            ItemKind = ApplicationKind.,
         //            Icon = bitmapImage,
         //            GameInfo = gameInfo
         //        };
         //        allApps.Add(MenuItem);
         //    }
         //}
+
+        private async Task IndexGOGGames()
+        {
+            var handler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
+            var games = handler.FindAllGames();
+            foreach (var game in games)
+            {
+                var gogGame = game.Value as GOGGame;
+                SteamGridDbGame gameInfo = (await db.SearchForGamesAsync(gogGame.Name)).First();;
+                BitmapImage bitmapImage = new();
+
+                var image = await db.GetIconsForGameAsync(gameInfo);
+                if (image.Length != 0)
+                    bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
+                else
+                {
+                    using var stream = new MemoryStream();
+                    Icon.ExtractAssociatedIcon(Directory.GetFiles(gogGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
+                    stream.Position = 0;
+                    bitmapImage.SetSource(stream.AsRandomAccessStream());
+                }
+
+                var MenuItem = new StartMenuItem()
+                {
+                    ItemName = gogGame.Name,
+                    //ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
+                    ItemKind = ApplicationKind.GOGGame,
+                    Icon = bitmapImage,
+                    GameInfo = gameInfo
+                };
+                allApps.Add(MenuItem);
+            }
+        }
 
         private SteamGridDb db;
 
