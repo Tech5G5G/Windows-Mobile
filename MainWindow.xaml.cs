@@ -69,8 +69,8 @@ namespace Windows_Mobile
 
         private async Task PopulateStartMenu()
         {
-            var egsHandler = new GameFinder.StoreHandlers.EGS.EGSHandler(OperatingSystem.IsWindows() ? GameFinder.RegistryUtils.WindowsRegistry.Shared : null, FileSystem.Shared);
-            var eGames = egsHandler.FindAllGames();
+            var gogHandler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
+            var gogGames = gogHandler.FindAllGames();
 
             var xhandler = new GameFinder.StoreHandlers.Xbox.XboxHandler(FileSystem.Shared);
             var xgames = xhandler.FindAllGames();
