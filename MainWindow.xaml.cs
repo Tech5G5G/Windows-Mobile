@@ -66,7 +66,7 @@ namespace Windows_Mobile
             foreach (var game in games)
             {
                 var steamGame = game.Value as SteamGame;
-                if (steamGame.AppId.Value != 228980) 
+                if (steamGame.AppId.Value != 228980 && steamGame is not null) 
                 {
                     SteamGridDbGame gameInfo = null;
                     BitmapImage bitmapImage = new();
@@ -182,29 +182,32 @@ namespace Windows_Mobile
             foreach (var game in games)
             {
                 var gogGame = game.Value as GOGGame;
-                SteamGridDbGame gameInfo = (await db.SearchForGamesAsync(gogGame.Name)).First();;
-                BitmapImage bitmapImage = new();
-
-                var image = await db.GetIconsForGameAsync(gameInfo);
-                if (image.Length != 0)
-                    bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
-                else
+                if (gogGame is not null)
                 {
-                    using var stream = new MemoryStream();
-                    Icon.ExtractAssociatedIcon(Directory.GetFiles(gogGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
-                    stream.Position = 0;
-                    bitmapImage.SetSource(stream.AsRandomAccessStream());
+                    SteamGridDbGame gameInfo = (await db.SearchForGamesAsync(gogGame.Name)).First(); ;
+                    BitmapImage bitmapImage = new();
+
+                    var image = await db.GetIconsForGameAsync(gameInfo);
+                    if (image.Length != 0)
+                        bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
+                    else
+                    {
+                        using var stream = new MemoryStream();
+                        Icon.ExtractAssociatedIcon(Directory.GetFiles(gogGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
+                        stream.Position = 0;
+                        bitmapImage.SetSource(stream.AsRandomAccessStream());
+                    }
+
+                    var MenuItem = new StartMenuItem()
+                    {
+                        ItemName = gogGame.Name,
+                        //ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
+                        ItemKind = ApplicationKind.GOGGame,
+                        Icon = bitmapImage,
+                        GameInfo = gameInfo
+                    };
+                    allApps.Add(MenuItem);
                 }
-
-                var MenuItem = new StartMenuItem()
-                {
-                    ItemName = gogGame.Name,
-                    //ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
-                    ItemKind = ApplicationKind.GOGGame,
-                    Icon = bitmapImage,
-                    GameInfo = gameInfo
-                };
-                allApps.Add(MenuItem);
             }
         }
 
