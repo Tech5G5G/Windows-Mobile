@@ -22,7 +22,7 @@
             <Grid Margin="0,0,0,60" VerticalAlignment="Stretch" Background="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource AccentControlElevationBorderBrush}">
                 <Grid.Resources>
                     <DataTemplate x:Key="StartMenuItemTemplate" x:DataType="local:StartMenuItem">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                        <StackPanel Orientation="Horizontal" Background="Transparent" Spacing="8">
                             <Image Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
                             <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
                             <StackPanel.ContextFlyout>
