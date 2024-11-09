@@ -41,4 +41,5 @@ public class StartMenuItem
     public string ItemStartURI { get; set; }
     public BitmapImage Icon { get; set; }
     public SteamGridDbGame GameInfo { get; set; }
+    public string Id { get; set; }
 }
