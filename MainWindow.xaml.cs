@@ -24,6 +24,7 @@ using GameFinder.RegistryUtils;
 using GameFinder.StoreHandlers.GOG;
 using GameFinder.StoreHandlers.Steam;
 using craftersmine.SteamGridDBNet.Exceptions;
+using Microsoft.Win32;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -177,6 +178,7 @@ namespace Windows_Mobile
 
         private async Task IndexGOGGames()
         {
+            string gogInstallation = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty).ToString();
             var handler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
             var games = handler.FindAllGames();
             foreach (var game in games)
@@ -184,7 +186,7 @@ namespace Windows_Mobile
                 var gogGame = game.Value as GOGGame;
                 if (gogGame is not null)
                 {
-                    SteamGridDbGame gameInfo = (await db.SearchForGamesAsync(gogGame.Name)).First(); ;
+                    SteamGridDbGame gameInfo = (await db.SearchForGamesAsync(gogGame.Name)).First();
                     BitmapImage bitmapImage = new();
 
                     var image = await db.GetIconsForGameAsync(gameInfo);
@@ -201,10 +203,11 @@ namespace Windows_Mobile
                     var MenuItem = new StartMenuItem()
                     {
                         ItemName = gogGame.Name,
-                        //ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
+                        ItemStartURI = $"\"{gogInstallation}\\GalaxyClient.exe\" /command=runGame /gameId={gogGame.Id.Value} /path=\"{gogGame.Path}\"",
                         ItemKind = ApplicationKind.GOGGame,
                         Icon = bitmapImage,
-                        GameInfo = gameInfo
+                        GameInfo = gameInfo,
+                        Id = gogGame.Id.Value.ToString()
                     };
                     allApps.Add(MenuItem);
                 }
@@ -357,6 +360,7 @@ namespace Windows_Mobile
                         break;
                     case ApplicationKind.SteamGame:
                     case ApplicationKind.EpicGamesGame:
+                    case ApplicationKind.GOGGame:
                     case ApplicationKind.XboxGame:
                         gamesList.Add(item);
                         break;
@@ -567,6 +571,34 @@ namespace Windows_Mobile
                         case ContentDialogResult.Secondary:
                             var productID = selectedItemInfo.ItemStartURI.Split(' ').Last();
                             Process.Start(new ProcessStartInfo($"msxbox://game/?productId={productID}") { UseShellExecute = true });
+                            break;
+                    }
+                }
+                else if (selectedItemInfo.ItemKind == ApplicationKind.GOGGame)
+                {
+                    var dialog = new ContentDialog();
+
+                    var content = new Grid() { Margin = new Thickness(-24) };
+                    var heros = await db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
+                    var logos = await db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
+                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
+                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
+                    dialog.Content = content;
+
+                    dialog.XamlRoot = Content.XamlRoot;
+                    dialog.CloseButtonText = "Cancel";
+                    dialog.SecondaryButtonText = "View in GOG Galaxy";
+                    dialog.PrimaryButtonText = "Play";
+                    dialog.DefaultButton = ContentDialogButton.Primary;
+                    var selection = await dialog.ShowAsync();
+
+                    switch (selection)
+                    {
+                        case ContentDialogResult.Primary:
+                            Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
+                            break;
+                        case ContentDialogResult.Secondary:
+                            Process.Start(new ProcessStartInfo($"goggalaxy://openGameView/{selectedItemInfo.Id}") { UseShellExecute = true });
                             break;
                     }
                 }
