@@ -22,6 +22,7 @@ public class EGSGameInfo
     public string AppName { get; set; }
 }
 
+///<summary>Used for sorting and starting applications</summary>
 public enum ApplicationKind
 {
     Normal,
@@ -34,6 +35,7 @@ public enum ApplicationKind
     Packaged
 }
 
+/// <summary>Represents an item in the start menu</summary>
 public class StartMenuItem
 {
     public string ItemName { get; set;  }
