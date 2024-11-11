@@ -397,15 +397,14 @@ namespace Windows_Mobile
                     var shellFile = ShellFile.FromFilePath(item);
                     string name = shellFile.Name == "Administrative Tools" ? "Windows Tools" : shellFile.Name;
                     string targetPath = shellFile.Properties.System.Link.TargetParsingPath.Value;
+                    string arguments = shellFile.Properties.System.Link.Arguments.Value is not null ? shellFile.Properties.System.Link.Arguments.Value : string.Empty;
 
+                    if (!targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
+                    {
                     BitmapImage bitmapImage = new();
-                    ApplicationKind appKind = (targetPath.EndsWith("steam.exe") && name == "Steam") || (targetPath.EndsWith("EpicGamesLauncher.exe") && name == "Epic Games Launcher") ? ApplicationKind.Launcher : ApplicationKind.Normal;
+                        ApplicationKind appKind = targetPath.Contains("Steam.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.Contains("EpicGamesLauncher.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.EndsWith("GalaxyClient.exe", StringComparison.InvariantCultureIgnoreCase) ? ApplicationKind.Launcher : ApplicationKind.Normal;
                     SteamGridDbGame game = null;
 
-                    if (targetPath.StartsWith("steam://rungameid/") || targetPath.StartsWith("com.epicgames.launcher://"))
-                        continue;
-                    else
-                    {
                         int number = targetPath switch
                         {
                             "Control Panel" => 21,
@@ -429,7 +428,6 @@ namespace Windows_Mobile
                         bitmap.Save(stream, ImageFormat.Png);
                         stream.Position = 0;
                         bitmapImage.SetSource(stream.AsRandomAccessStream());
-                    }
 
                     var MenuItem = new StartMenuItem()
                     {
@@ -444,10 +442,10 @@ namespace Windows_Mobile
                 }
             }
         }
+        }
 
         private void StartMenu_Click(object sender, RoutedEventArgs e) => startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
         private void TaskView_Click(object sender, RoutedEventArgs e) => taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = (NavigationViewItem)args.SelectedItem == games_NavItem ? gamesList : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? launcherList : appsList });
