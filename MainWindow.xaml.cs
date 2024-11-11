@@ -328,6 +328,17 @@ namespace Windows_Mobile
                                 };
                                 allApps.Add(XboxMenuItem);
                                 break;
+                            case "Roblox":
+                                var RobloxMenuItem = new StartMenuItem()
+                                {
+                                    ItemName = appListEntry.DisplayInfo.DisplayName,
+                                    ItemStartURI = package.Id.FullName,
+                                    ItemKind = ApplicationKind.XboxGame,
+                                    Icon = new BitmapImage() { UriSource = package.Logo },
+                                    GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
+                                };
+                                allApps.Add(RobloxMenuItem);
+                                break;
                             default:
                                 var MenuItem = new StartMenuItem()
                                 {
