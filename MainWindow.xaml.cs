@@ -493,89 +493,55 @@ namespace Windows_Mobile
             {
                 var selectedItemInfo = e.ClickedItem as StartMenuItem;
 
-                if (selectedItemInfo.ItemKind == ApplicationKind.Normal || selectedItemInfo.ItemKind == ApplicationKind.Launcher)
-                    Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
-                else if (selectedItemInfo.ItemKind == ApplicationKind.SteamGame)
+                if (selectedItemInfo.ItemKind == ApplicationKind.Normal || selectedItemInfo.ItemKind == ApplicationKind.Launcher || selectedItemInfo.ItemKind == ApplicationKind.Packaged || selectedItemInfo.ItemKind == ApplicationKind.LauncherPackaged)
+                    App.StartApplication(selectedItemInfo);
+                else
                 {
-                    var dialog = new ContentDialog();
-
                     var content = new Grid() { Margin = new Thickness(-24) };
-                    var heros = await db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
-                    var logos = await db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
+                    var heros = await App.db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
+                    var logos = await App.db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
                     content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
                     content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    dialog.Content = content;
+                    var dialog = new ContentDialog() { XamlRoot = this.Content.XamlRoot, Content = content, PrimaryButtonText = "Play", CloseButtonText = "Cancel", DefaultButton = ContentDialogButton.Primary };
 
-                    dialog.XamlRoot = Content.XamlRoot;
-                    dialog.CloseButtonText = "Cancel";
+                    if (selectedItemInfo.ItemKind == ApplicationKind.SteamGame)
+                    {
                     dialog.SecondaryButtonText = "View in Steam";
-                    dialog.PrimaryButtonText = "Play";
-                    dialog.DefaultButton = ContentDialogButton.Primary;
                     var selection = await dialog.ShowAsync();
 
-                    switch (selection)
-                    {
-                        case ContentDialogResult.Primary:
-                            Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
-                            break;
-                        case ContentDialogResult.Secondary:
-                            Process.Start(new ProcessStartInfo("steam://openurl/https://store.steampowered.com/app/" + selectedItemInfo.ItemStartURI.Replace("steam://rungameid/", null)) { UseShellExecute = true });
-                            break;
-                    }
+                        if (selection == ContentDialogResult.Primary)
+                            App.StartApplication(selectedItemInfo);
+                        else if (selection == ContentDialogResult.Secondary)
+                            Process.Start(new ProcessStartInfo($"steam://openurl/https://store.steampowered.com/app/{selectedItemInfo.Id}") { UseShellExecute = true });
                 }
                 else if (selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame)
                 {
-                    var dialog = new ContentDialog();
-
-                    var content = new Grid() { Margin = new Thickness(-24) };
-                    var heros = await db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
-                    var logos = await db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    dialog.Content = content;
-
-                    dialog.XamlRoot = Content.XamlRoot;
-                    dialog.CloseButtonText = "Cancel";
-                    dialog.PrimaryButtonText = "Play";
-                    dialog.DefaultButton = ContentDialogButton.Primary;
                     var selection = await dialog.ShowAsync();
 
                     if (selection == ContentDialogResult.Primary)
-                        Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
+                            App.StartApplication(selectedItemInfo);
                 }
                 else if (selectedItemInfo.ItemKind == ApplicationKind.XboxGame)
                 {
-                    var dialog = new ContentDialog();
-
-                    var content = new Grid() { Margin = new Thickness(-24) };
-                    var heros = await db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
-                    var logos = await db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    dialog.Content = content;
-
-                    dialog.XamlRoot = Content.XamlRoot;
-                    dialog.CloseButtonText = "Cancel";
-                    dialog.SecondaryButtonText = selectedItemInfo.ItemStartURI.Contains(' ') ? "View in Xbox app" : null;
-                    dialog.PrimaryButtonText = "Play";
-                    dialog.DefaultButton = ContentDialogButton.Primary;
+                        dialog.SecondaryButtonText = selectedItemInfo.Id is not null ? "View in the Xbox app" : null;
                     var selection = await dialog.ShowAsync();
 
-                    switch (selection)
+                        if (selection == ContentDialogResult.Primary)
+                            App.StartApplication(selectedItemInfo);
+                        else if (selection == ContentDialogResult.Secondary)
+                            Process.Start(new ProcessStartInfo($"msxbox://game/?productId={selectedItemInfo.Id}") { UseShellExecute = true });
+                    }
+                    else if (selectedItemInfo.ItemKind == ApplicationKind.GOGGame)
                     {
-                        case ContentDialogResult.Primary:
-                            var packageName = selectedItemInfo.ItemStartURI.Split(' ').First();
+                        dialog.SecondaryButtonText = "View in GOG Galaxy";
+                        var selection = await dialog.ShowAsync();
 
-                            PackageManager packageManager = new();
-                            Package package = packageManager.FindPackageForUser(string.Empty, packageName);
-
-                            IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-                            await appListEntries.First(i => i.DisplayInfo.DisplayName == selectedItemInfo.ItemName).LaunchAsync();
-                            break;
-                        case ContentDialogResult.Secondary:
-                            var productID = selectedItemInfo.ItemStartURI.Split(' ').Last();
-                            Process.Start(new ProcessStartInfo($"msxbox://game/?productId={productID}") { UseShellExecute = true });
-                            break;
+                        if (selection == ContentDialogResult.Primary)
+                            App.StartApplication(selectedItemInfo);
+                        else if (selection == ContentDialogResult.Secondary)
+                            Process.Start(new ProcessStartInfo($"goggalaxy://openGameView/{selectedItemInfo.Id}") { UseShellExecute = true });
+                    }
+                }
                     }
                 }
 
