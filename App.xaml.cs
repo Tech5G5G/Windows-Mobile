@@ -1,7 +1,15 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using Windows.ApplicationModel;
+using System.Linq;
 using System.Runtime.InteropServices;
+using Windows.ApplicationModel.Core;
+using Windows.Management.Deployment;
+using Windows_Mobile.Types;
+using craftersmine.SteamGridDBNet;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
