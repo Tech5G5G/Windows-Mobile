@@ -92,7 +92,7 @@
             </StackPanel>
         </Grid>
         <Grid Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Margin="8" Height="54" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-            <GridView ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
+            <GridView ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
         </Grid>
     </Grid>
 </Window>
