@@ -10,6 +10,20 @@
     xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
     mc:Ignorable="d">
     <Grid>
+        <Grid.Resources>
+            <DataTemplate x:Key="StartMenuItemTemplate" x:DataType="local:StartMenuItem">
+                <StackPanel Orientation="Horizontal" RightTapped="StartMenuItem_RightTapped" Background="Transparent" Spacing="8">
+                    <StackPanel.Tag>
+                        <local:StartMenuItem ItemKind="{x:Bind ItemKind}" ItemStartURI="{x:Bind ItemStartURI}" Icon="{x:Bind Icon}" />
+                    </StackPanel.Tag>
+                    <Image Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
+                    <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate x:Key="LauncherTemplate" x:DataType="local:StartMenuItem">
+                <Image ToolTipService.ToolTip="{x:Bind ItemName}" Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
+            </DataTemplate>
+        </Grid.Resources>
         <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Rectangle.Fill>
                 <ImageBrush Stretch="UniformToFill" x:Name="wallpaperImage" />
@@ -20,23 +34,6 @@
                 <ThemeShadow />
             </Grid.Shadow>
             <Grid Margin="0,0,0,60" VerticalAlignment="Stretch" Background="{ThemeResource LayerOnMicaBaseAltFillColorSecondaryBrush}" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource AccentControlElevationBorderBrush}">
-                <Grid.Resources>
-                    <DataTemplate x:Key="StartMenuItemTemplate" x:DataType="local:StartMenuItem">
-                        <StackPanel Orientation="Horizontal" Background="Transparent" Spacing="8">
-                            <Image Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
-                            <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
-                            <StackPanel.ContextFlyout>
-                                <MenuFlyout>
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE7EF;}" Text="Run as administrator" />
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xED43;}" Text="Open file location" />
-                                    <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE713;}" Text="App settings" />
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE74D;}" Text="Uninstall" />
-                                </MenuFlyout>
-                            </StackPanel.ContextFlyout>
-                        </StackPanel>
-                    </DataTemplate>
-                </Grid.Resources>
                 <AutoSuggestBox x:Name="autoSuggestBox" Height="40" FontSize="15" Margin="12" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search games" QueryIcon="Find" TextChanged="AutoSuggestBox_TextChanged" />
                 <NavigationView x:Name="startNV" Margin="0,64,0,0" IsPaneToggleButtonVisible="False" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" SelectionChanged="NavigationView_SelectionChanged" PaneDisplayMode="Top">
                     <NavigationView.MenuItems>
