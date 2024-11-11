@@ -98,7 +98,8 @@ namespace Windows_Mobile
                         ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
                         ItemKind = ApplicationKind.SteamGame,
                         Icon = bitmapImage,
-                        GameInfo = gameInfo
+                        GameInfo = gameInfo,
+                        Id = steamGame.AppId.Value.ToString()
                     };
                     allApps.Add(MenuItem);
                 }
@@ -365,26 +366,26 @@ namespace Windows_Mobile
             {
                 if (!item.IsDuplicate(allApps))
                 {
-                switch (item.ItemKind)
-                {
-                    case ApplicationKind.Packaged:
-                    case ApplicationKind.Normal:
-                        appsList.Add(item);
-                        break;
-                    case ApplicationKind.SteamGame:
-                    case ApplicationKind.EpicGamesGame:
-                    case ApplicationKind.GOGGame:
-                    case ApplicationKind.XboxGame:
-                        gamesList.Add(item);
-                        break;
-                    case ApplicationKind.LauncherPackaged:
-                    case ApplicationKind.Launcher:
-                        launcherList.Add(item);
-                        break;
+                    switch (item.ItemKind)
+                    {
+                        case ApplicationKind.Packaged:
+                        case ApplicationKind.Normal:
+                            appsList.Add(item);
+                            break;
+                        case ApplicationKind.SteamGame:
+                        case ApplicationKind.EpicGamesGame:
+                        case ApplicationKind.GOGGame:
+                        case ApplicationKind.XboxGame:
+                            gamesList.Add(item);
+                            break;
+                        case ApplicationKind.LauncherPackaged:
+                        case ApplicationKind.Launcher:
+                            launcherList.Add(item);
+                            break;
+                    }
+                    allApps.Add(item);
                 }
-                allApps.Add(item);
             }
-        }
         }
 
         private void IndexStartMenuFolder(string userItemsDirectory)
@@ -411,9 +412,9 @@ namespace Windows_Mobile
 
                     if (!targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
                     {
-                    BitmapImage bitmapImage = new();
+                        BitmapImage bitmapImage = new();
                         ApplicationKind appKind = targetPath.Contains("Steam.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.Contains("EpicGamesLauncher.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.EndsWith("GalaxyClient.exe", StringComparison.InvariantCultureIgnoreCase) ? ApplicationKind.Launcher : ApplicationKind.Normal;
-                    SteamGridDbGame game = null;
+                        SteamGridDbGame game = null;
 
                         int number = targetPath switch
                         {
@@ -439,19 +440,19 @@ namespace Windows_Mobile
                         stream.Position = 0;
                         bitmapImage.SetSource(stream.AsRandomAccessStream());
 
-                    var MenuItem = new StartMenuItem()
-                    {
-                        ItemName = name,
-                        ItemStartURI = item,
-                        ItemKind = appKind,
-                        Icon = bitmapImage,
-                        GameInfo = game
-                    };
+                        var MenuItem = new StartMenuItem()
+                        {
+                            ItemName = name,
+                            ItemStartURI = item,
+                            ItemKind = appKind,
+                            Icon = bitmapImage,
+                            GameInfo = game
+                        };
 
-                    allApps.Add(MenuItem);
+                        allApps.Add(MenuItem);
+                    }
                 }
             }
-        }
         }
 
         private void StartMenu_Click(object sender, RoutedEventArgs e) => startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
@@ -514,25 +515,25 @@ namespace Windows_Mobile
 
                     if (selectedItemInfo.ItemKind == ApplicationKind.SteamGame)
                     {
-                    dialog.SecondaryButtonText = "View in Steam";
-                    var selection = await dialog.ShowAsync();
+                        dialog.SecondaryButtonText = "View in Steam";
+                        var selection = await dialog.ShowAsync();
 
                         if (selection == ContentDialogResult.Primary)
                             App.StartApplication(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
                             Process.Start(new ProcessStartInfo($"steam://openurl/https://store.steampowered.com/app/{selectedItemInfo.Id}") { UseShellExecute = true });
-                }
-                else if (selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame)
-                {
-                    var selection = await dialog.ShowAsync();
+                    }
+                    else if (selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame)
+                    {
+                        var selection = await dialog.ShowAsync();
 
-                    if (selection == ContentDialogResult.Primary)
+                        if (selection == ContentDialogResult.Primary)
                             App.StartApplication(selectedItemInfo);
-                }
-                else if (selectedItemInfo.ItemKind == ApplicationKind.XboxGame)
-                {
+                    }
+                    else if (selectedItemInfo.ItemKind == ApplicationKind.XboxGame)
+                    {
                         dialog.SecondaryButtonText = selectedItemInfo.Id is not null ? "View in the Xbox app" : null;
-                    var selection = await dialog.ShowAsync();
+                        var selection = await dialog.ShowAsync();
 
                         if (selection == ContentDialogResult.Primary)
                             App.StartApplication(selectedItemInfo);
@@ -550,11 +551,11 @@ namespace Windows_Mobile
                             Process.Start(new ProcessStartInfo($"goggalaxy://openGameView/{selectedItemInfo.Id}") { UseShellExecute = true });
                     }
                 }
-                    }
-                }
+            }
+        }
 
         private void StartMenuItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
-                {
+        {
             var senderPanel = sender as StackPanel;
             var appType = (senderPanel.Tag as StartMenuItem).ItemKind;
             var flyout = new MenuFlyout();
@@ -571,7 +572,7 @@ namespace Windows_Mobile
             var uninstallButton = new MenuFlyoutItem() { Text = "Uninstall", Icon = new FontIcon() { Glyph = "\uE74D" } };
 
             switch (appType)
-                    {
+            {
                 default:
                 case ApplicationKind.Normal:
                 case ApplicationKind.Launcher:
@@ -601,13 +602,13 @@ namespace Windows_Mobile
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
                     uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
-                            break;
+                    break;
                 case ApplicationKind.XboxGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
                     uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
-                            break;
-                    }
+                    break;
+            }
 
             flyout.Items.Add(openButton);
             if (adminButton.Visibility == Visibility.Visible)
