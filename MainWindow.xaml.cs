@@ -215,8 +215,6 @@ namespace Windows_Mobile
             }
         }
 
-        private SteamGridDb db;
-
         private static string[] IndexFolder(string folderPath)
         {
             string[] files = Directory.GetFiles(folderPath);
@@ -255,10 +253,11 @@ namespace Windows_Mobile
                         var MenuItem = new StartMenuItem()
                         {
                             ItemName = appListEntry.DisplayInfo.DisplayName,
-                            ItemStartURI = package.Id.FullName + " " + productId.StoreId,
+                            ItemStartURI = package.Id.FullName,
                             ItemKind = ApplicationKind.XboxGame,
                             Icon = new BitmapImage() { UriSource = package.Logo },
                             GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First(),
+                            Id = productId.StoreId
                         };
                         allApps.Add(MenuItem);
                     }
