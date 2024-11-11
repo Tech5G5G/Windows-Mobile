@@ -46,11 +46,10 @@ namespace Windows_Mobile
             startNV.SelectedItem = games_NavItem;
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            db = new SteamGridDb("a267ca54f99e5f8521e6f04f052aeeeb");
             PopulateStartMenu();
         }
 
-        private async Task PopulateStartMenu()
+        private async void PopulateStartMenu()
         {
             await IndexSteamGames();
             await IndexEGSGames();
@@ -75,14 +74,14 @@ namespace Windows_Mobile
                     BitmapImage bitmapImage = new();
                     try
                     {
-                        gameInfo = await db.GetGameBySteamIdAsync((int)steamGame.AppId.Value);
+                        gameInfo = await App.db.GetGameBySteamIdAsync((int)steamGame.AppId.Value);
                     }
                     catch (SteamGridDbNotFoundException)
                     {
-                        gameInfo = (await db.SearchForGamesAsync(steamGame.Name)).First();
+                        gameInfo = (await App.db.SearchForGamesAsync(steamGame.Name)).First();
                     }
 
-                    var image = await db.GetIconsForGameAsync(gameInfo);
+                    var image = await App.db.GetIconsForGameAsync(gameInfo);
                     if (image.Length != 0)
                         bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
                     else
@@ -116,8 +115,8 @@ namespace Windows_Mobile
                     var appInfo = JsonSerializer.Deserialize<EGSGameInfo>(File.ReadAllText(app));
                     BitmapImage bitmapImage = new();
 
-                    SteamGridDbGame game = (await db.SearchForGamesAsync(appInfo.DisplayName)).First();
-                    var image = await db.GetIconsForGameAsync(game);
+                    SteamGridDbGame game = (await App.db.SearchForGamesAsync(appInfo.DisplayName)).First();
+                    var image = await App.db.GetIconsForGameAsync(game);
                     if (image.Length != 0)
                         bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
                     else
@@ -188,10 +187,10 @@ namespace Windows_Mobile
                 var gogGame = game.Value as GOGGame;
                 if (gogGame is not null)
                 {
-                    SteamGridDbGame gameInfo = (await db.SearchForGamesAsync(gogGame.Name)).First();
+                    SteamGridDbGame gameInfo = (await App.db.SearchForGamesAsync(gogGame.Name)).First();
                     BitmapImage bitmapImage = new();
 
-                    var image = await db.GetIconsForGameAsync(gameInfo);
+                    var image = await App.db.GetIconsForGameAsync(gameInfo);
                     if (image.Length != 0)
                         bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
                     else
@@ -259,7 +258,7 @@ namespace Windows_Mobile
                             ItemStartURI = package.Id.FullName + " " + productId.StoreId,
                             ItemKind = ApplicationKind.XboxGame,
                             Icon = new BitmapImage() { UriSource = package.Logo },
-                            GameInfo = (await db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
+                            GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First(),
                         };
                         allApps.Add(MenuItem);
                     }
@@ -276,7 +275,7 @@ namespace Windows_Mobile
                             ItemStartURI = package.Id.FullName,
                             ItemKind = ApplicationKind.XboxGame,
                             Icon = new BitmapImage() { UriSource = package.Logo },
-                            GameInfo = (await db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
+                            GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
                         };
                         allApps.Add(MenuItem);
                     }
@@ -354,6 +353,8 @@ namespace Windows_Mobile
 
             foreach (StartMenuItem item in orderedList)
             {
+                if (!item.IsDuplicate(allApps))
+                {
                 switch (item.ItemKind)
                 {
                     case ApplicationKind.Packaged:
@@ -373,6 +374,7 @@ namespace Windows_Mobile
                 }
                 allApps.Add(item);
             }
+        }
         }
 
         private void IndexStartMenuFolder(string userItemsDirectory)
