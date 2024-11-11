@@ -36,7 +36,7 @@ namespace Windows_Mobile
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            m_window = new MainWindow();
+            db = new SteamGridDb("a267ca54f99e5f8521e6f04f052aeeeb");
             m_window.Activate();
         }
 
@@ -56,6 +56,8 @@ namespace Windows_Mobile
         private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
 
         private Window m_window;
+        public static SteamGridDb db { get; set; }
+
         public async static void StartApplication(StartMenuItem selectedItemInfo, bool runAsAdmin = false)
         {
             if (selectedItemInfo.ItemKind == ApplicationKind.Normal || selectedItemInfo.ItemKind == ApplicationKind.Launcher || selectedItemInfo.ItemKind == ApplicationKind.SteamGame || selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame || selectedItemInfo.ItemKind == ApplicationKind.GOGGame)
