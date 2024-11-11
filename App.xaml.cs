@@ -34,10 +34,12 @@ namespace Windows_Mobile
         /// Invoked when the application is launched.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             db = new SteamGridDb("a267ca54f99e5f8521e6f04f052aeeeb");
-            m_window.Activate();
+
+            MainWindow = new MainWindow();
+            MainWindow.Activate();
         }
 
         public static Icon ExtractIcon(string file, int number, bool largeIcon)
@@ -55,7 +57,8 @@ namespace Windows_Mobile
         [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
         private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
 
-        private Window m_window;
+        public static Window MainWindow { get; set; }
+
         public static SteamGridDb db { get; set; }
 
         public async static void StartApplication(StartMenuItem selectedItemInfo, bool runAsAdmin = false)
