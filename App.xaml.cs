@@ -56,5 +56,21 @@ namespace Windows_Mobile
         private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
 
         private Window m_window;
+        public async static void StartApplication(StartMenuItem selectedItemInfo, bool runAsAdmin = false)
+        {
+            if (selectedItemInfo.ItemKind == ApplicationKind.Normal || selectedItemInfo.ItemKind == ApplicationKind.Launcher || selectedItemInfo.ItemKind == ApplicationKind.SteamGame || selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame || selectedItemInfo.ItemKind == ApplicationKind.GOGGame)
+            {
+                try { Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true, Verb = runAsAdmin ? "runas" : null }); }
+                catch { }
+            }
+            else if (selectedItemInfo.ItemKind == ApplicationKind.Packaged || selectedItemInfo.ItemKind == ApplicationKind.LauncherPackaged || selectedItemInfo.ItemKind == ApplicationKind.XboxGame)
+            {
+                PackageManager packageManager = new();
+                Package package = packageManager.FindPackageForUser(string.Empty, selectedItemInfo.ItemStartURI);
+
+                IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
+                await appListEntries.First(i => i.DisplayInfo.DisplayName == selectedItemInfo.ItemName).LaunchAsync();
+            }
+        }
     }
 }
