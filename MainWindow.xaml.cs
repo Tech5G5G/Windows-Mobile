@@ -578,43 +578,77 @@ namespace Windows_Mobile
                             break;
                     }
                 }
-                else if (selectedItemInfo.ItemKind == ApplicationKind.GOGGame)
+
+        private void StartMenuItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
                 {
-                    var dialog = new ContentDialog();
+            var senderPanel = sender as StackPanel;
+            var appType = (senderPanel.Tag as StartMenuItem).ItemKind;
+            var flyout = new MenuFlyout();
 
-                    var content = new Grid() { Margin = new Thickness(-24) };
-                    var heros = await db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
-                    var logos = await db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    dialog.Content = content;
+            var openButton = new MenuFlyoutItem();
+            openButton.Click += (sender, args) => App.StartApplication(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon));
 
-                    dialog.XamlRoot = Content.XamlRoot;
-                    dialog.CloseButtonText = "Cancel";
-                    dialog.SecondaryButtonText = "View in GOG Galaxy";
-                    dialog.PrimaryButtonText = "Play";
-                    dialog.DefaultButton = ContentDialogButton.Primary;
-                    var selection = await dialog.ShowAsync();
+            var adminButton = new MenuFlyoutItem() { Text = "Open as admin", Icon = new FontIcon() { Glyph = "\uE7EF" }, Visibility = Visibility.Collapsed };
+            adminButton.Click += (sender, args) => App.StartApplication(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon), true);
 
-                    switch (selection)
+            var locationButton = new MenuFlyoutItem() { Text = "Open file location", Icon = new FontIcon() { Glyph = "\uED43" }, Visibility = Visibility.Collapsed };
+            locationButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("explorer.exe", $"/select, {(senderPanel.Tag as StartMenuItem).ItemStartURI}") { UseShellExecute = true });
+
+            var uninstallButton = new MenuFlyoutItem() { Text = "Uninstall", Icon = new FontIcon() { Glyph = "\uE74D" } };
+
+            switch (appType)
                     {
-                        case ContentDialogResult.Primary:
-                            Process.Start(new ProcessStartInfo(selectedItemInfo.ItemStartURI) { UseShellExecute = true });
+                default:
+                case ApplicationKind.Normal:
+                case ApplicationKind.Launcher:
+                    openButton.Text = "Open";
+                    openButton.Icon = new FontIcon() { Glyph = "\uE737" };
+                    adminButton.Visibility = Visibility.Visible;
+                    locationButton.Visibility = Visibility.Visible;
+                    uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
+                    break;
+                case ApplicationKind.Packaged:
+                case ApplicationKind.LauncherPackaged:
+                    openButton.Text = "Open";
+                    openButton.Icon = new FontIcon() { Glyph = "\uE737" };
+                    uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
+                    break;
+                case ApplicationKind.SteamGame:
+                    openButton.Text = "Play";
+                    openButton.Icon = new FontIcon() { Glyph = "\uE768" };
+                    uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Contains("Steam", StringComparison.InvariantCultureIgnoreCase)));
+                    break;
+                case ApplicationKind.EpicGamesGame:
+                    openButton.Text = "Play";
+                    openButton.Icon = new FontIcon() { Glyph = "\uE768" };
+                    uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Contains("Epic", StringComparison.InvariantCultureIgnoreCase)));
+                    break;
+                case ApplicationKind.GOGGame:
+                    openButton.Text = "Play";
+                    openButton.Icon = new FontIcon() { Glyph = "\uE768" };
+                    uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
                             break;
-                        case ContentDialogResult.Secondary:
-                            Process.Start(new ProcessStartInfo($"goggalaxy://openGameView/{selectedItemInfo.Id}") { UseShellExecute = true });
+                case ApplicationKind.XboxGame:
+                    openButton.Text = "Play";
+                    openButton.Icon = new FontIcon() { Glyph = "\uE768" };
+                    uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
                             break;
                     }
-                }
-                else if (selectedItemInfo.ItemKind == ApplicationKind.Packaged || selectedItemInfo.ItemKind == ApplicationKind.LauncherPackaged)
-                {
-                    PackageManager packageManager = new();
-                    Package package = packageManager.FindPackageForUser(string.Empty, selectedItemInfo.ItemStartURI);
 
-                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-                    await appListEntries.First(i => i.DisplayInfo.DisplayName == selectedItemInfo.ItemName).LaunchAsync();
-                }
-            }
+            flyout.Items.Add(openButton);
+            if (adminButton.Visibility == Visibility.Visible)
+                flyout.Items.Add(adminButton);
+
+            flyout.Items.Add(new MenuFlyoutSeparator());
+
+            if (locationButton.Visibility == Visibility.Visible)
+                flyout.Items.Add(locationButton);
+
+            flyout.Items.Add(uninstallButton);
+
+            FlyoutShowOptions options = new() { Position = e.GetPosition(senderPanel), Placement = FlyoutPlacementMode.RightEdgeAlignedTop };
+
+            flyout.ShowAt(senderPanel, options);
         }
     }
 }
