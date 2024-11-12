@@ -68,7 +68,7 @@ namespace Windows_Mobile
             foreach (var game in games)
             {
                 var steamGame = game.Value as SteamGame;
-                if (steamGame.AppId.Value != 228980 && steamGame is not null) 
+                if (steamGame is not null && steamGame.AppId.Value != 228980) 
                 {
                     SteamGridDbGame gameInfo = null;
                     BitmapImage bitmapImage = new();
@@ -180,7 +180,9 @@ namespace Windows_Mobile
 
         private async Task IndexGOGGames()
         {
-            string gogInstallation = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty).ToString();
+            var gogInstallationPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty);
+            string gogInstallation = gogInstallationPath is not null ? gogInstallationPath.ToString() : string.Empty;
+            
             var handler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
             var games = handler.FindAllGames();
             foreach (var game in games)
