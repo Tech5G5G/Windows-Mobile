@@ -28,9 +28,6 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using System.Diagnostics;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace Windows_Mobile
 {
     public sealed partial class MainWindow : Window
@@ -182,7 +179,7 @@ namespace Windows_Mobile
         {
             var gogInstallationPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty);
             string gogInstallation = gogInstallationPath is not null ? gogInstallationPath.ToString() : string.Empty;
-            
+
             var handler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
             var games = handler.FindAllGames();
             foreach (var game in games)
