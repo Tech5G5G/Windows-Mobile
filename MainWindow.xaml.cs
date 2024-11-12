@@ -39,7 +39,7 @@ namespace Windows_Mobile
         {
             this.InitializeComponent();
 
-            var jars = Directory.GetFiles(@"C:\Users\tomczyki\AppData\Roaming\.minecraft\mods");
+            var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
             foreach (string jar in jars)
             {
                 using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
