@@ -55,8 +55,10 @@ namespace Windows_Mobile
 
                         var entry = zf.GetEntry(modInfo.icon);
                         using var stream = zf.GetInputStream(entry);
+                        using var randomStream = new MemoryStream();
+                        stream.CopyTo(randomStream);
                         var bmp = new BitmapImage();
-                        bmp.SetSource(stream.AsRandomAccessStream());
+                        bmp.SetSource(randomStream.AsRandomAccessStream());
                         modInfo.image = bmp;
                     } 
                 }
