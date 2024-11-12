@@ -26,15 +26,41 @@ using craftersmine.SteamGridDBNet.Exceptions;
 using Microsoft.Win32;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using ICSharpCode.SharpZipLib.Zip;
 using System.Diagnostics;
 
 namespace Windows_Mobile
 {
     public sealed partial class MainWindow : Window
     {
+        ObservableCollection<MCModInfo> mods = [];
+
         public MainWindow()
         {
             this.InitializeComponent();
+
+            var jars = Directory.GetFiles(@"C:\Users\tomczyki\AppData\Roaming\.minecraft\mods");
+            foreach (string jar in jars)
+            {
+                using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
+                foreach (ZipEntry ze in zf)
+                {
+                    if (ze.Name.Contains(".mod.json"))
+                    {
+                        using Stream s = zf.GetInputStream(ze);
+                        StreamReader reader = new(s);
+                        string json = reader.ReadToEnd();
+                        var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
+                        mods.Add(modInfo);
+
+                        var entry = zf.GetEntry(modInfo.icon);
+                        using var stream = zf.GetInputStream(entry);
+                        var bmp = new BitmapImage();
+                        bmp.SetSource(stream.AsRandomAccessStream());
+                        modInfo.image = bmp;
+                    } 
+                }
+            }
 
             Title = "Windows Mobile";
             AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);

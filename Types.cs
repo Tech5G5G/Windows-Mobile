@@ -1,6 +1,7 @@
 using System.Xml.Serialization;
 using Microsoft.UI.Xaml.Media.Imaging;
 using craftersmine.SteamGridDBNet;
+using System.Collections.Generic;
 
 //Custom types for retriving data
 namespace Windows_Mobile.Types;
@@ -44,4 +45,23 @@ public class StartMenuItem
     public BitmapImage Icon { get; set; }
     public SteamGridDbGame GameInfo { get; set; }
     public string Id { get; set; }
+}
+
+public class MCModInfo
+{
+    public string name { get; set; }
+    public string version { get; set; }
+    public string description { get; set; }
+    public string icon { get; set; }
+    public string license { get; set; }
+    public MCModContact contact { get; set; }
+
+    public BitmapImage image { get; set; }
+}
+
+public class MCModContact
+{
+    public string homepage { get; set;}
+    public string sources { get; set;}
+    public string issues { get; set;}
 }
