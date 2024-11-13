@@ -68,32 +68,33 @@ namespace Windows_Mobile
                 var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
                 foreach (string jar in jars)
                 {
-if (!jar.EndsWith(".jar", StringComparison.InvariantCultureIgnoreCase))
+                    if (!jar.EndsWith(".jar", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
                     using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
                     var ze = zf.FindEntry("fabric.mod.json", true);
 
-if (ze != -1)
+                    if (ze != -1)
                     {
-                    using Stream s = zf.GetInputStream(ze);
-                    StreamReader reader = new(s);
-                    string json = reader.ReadToEnd();
-                    var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
+                        using Stream s = zf.GetInputStream(ze);
+                        StreamReader reader = new(s);
+                        string json = reader.ReadToEnd();
+                        var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
 
-                    var entry = zf.GetEntry(modInfo.icon);
-                    MemoryStream ms = new();
-                    zf.GetInputStream(entry).CopyTo(ms);
-                    ms.Position = 0;
-                    var bitmapImage = new BitmapImage();
-                    bitmapImage.SetSource(ms.AsRandomAccessStream());
-                    modInfo.image = bitmapImage;
+                        var entry = zf.GetEntry(modInfo.icon);
+                        MemoryStream ms = new();
+                        zf.GetInputStream(entry).CopyTo(ms);
+                        ms.Position = 0;
+                        var bitmapImage = new BitmapImage();
+                        bitmapImage.SetSource(ms.AsRandomAccessStream());
+                        modInfo.image = bitmapImage;
 
-                    mods.Add(modInfo);
+                        mods.Add(modInfo);
+                    }
+                    //Add additional code to handle mods without a mod.json
                 }
             }
         }
-}
 
         private async Task IndexSteamGames()
         {
@@ -689,7 +690,19 @@ if (ze != -1)
 
         private void Animation_Begin(object sender, RoutedEventArgs e)
         {
+            var preHeight = menuBar.ActualHeight;
+            var preWidth = menuBar.ActualWidth;
+            menuBar.Width = preWidth;
+            menuBar.HorizontalAlignment = HorizontalAlignment.Center;
+
             myStoryboard.Begin();
+            myStoryboard.Completed += (sender, args) => 
+            {
+                myStoryboard.Stop();
+
+                menuBar.Height = preHeight * 10;
+                menuBar.Width = preWidth / 2;
+            };
         }
     }
 }
