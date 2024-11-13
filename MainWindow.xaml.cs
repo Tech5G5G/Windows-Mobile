@@ -68,9 +68,14 @@ namespace Windows_Mobile
                 var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
                 foreach (string jar in jars)
                 {
+if (!jar.EndsWith(".jar", StringComparison.InvariantCultureIgnoreCase))
+                        continue;
+
                     using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
                     var ze = zf.FindEntry("fabric.mod.json", true);
 
+if (ze != -1)
+                    {
                     using Stream s = zf.GetInputStream(ze);
                     StreamReader reader = new(s);
                     string json = reader.ReadToEnd();
@@ -88,6 +93,7 @@ namespace Windows_Mobile
                 }
             }
         }
+}
 
         private async Task IndexSteamGames()
         {
