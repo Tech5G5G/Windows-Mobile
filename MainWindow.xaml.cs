@@ -26,18 +26,43 @@ using craftersmine.SteamGridDBNet.Exceptions;
 using Microsoft.Win32;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using ICSharpCode.SharpZipLib.Zip;
 using System.Diagnostics;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace Windows_Mobile
 {
     public sealed partial class MainWindow : Window
     {
+        ObservableCollection<MCModInfo> mods = [];
+
         public MainWindow()
         {
             this.InitializeComponent();
+
+            var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
+            foreach (string jar in jars)
+            {
+                using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
+                foreach (ZipEntry ze in zf)
+                {
+                    if (ze.Name.Contains(".mod.json"))
+                    {
+                        using Stream s = zf.GetInputStream(ze);
+                        StreamReader reader = new(s);
+                        string json = reader.ReadToEnd();
+                        var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
+                        mods.Add(modInfo);
+
+                        var entry = zf.GetEntry(modInfo.icon);
+                        using var stream = zf.GetInputStream(entry);
+                        using var randomStream = new MemoryStream();
+                        stream.CopyTo(randomStream);
+                        var bmp = new BitmapImage();
+                        bmp.SetSource(randomStream.AsRandomAccessStream());
+                        modInfo.image = bmp;
+                    } 
+                }
+            }
 
             Title = "Windows Mobile";
             AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
@@ -68,7 +93,7 @@ namespace Windows_Mobile
             foreach (var game in games)
             {
                 var steamGame = game.Value as SteamGame;
-                if (steamGame.AppId.Value != 228980 && steamGame is not null) 
+                if (steamGame is not null && steamGame.AppId.Value != 228980) 
                 {
                     SteamGridDbGame gameInfo = null;
                     BitmapImage bitmapImage = new();
@@ -180,7 +205,9 @@ namespace Windows_Mobile
 
         private async Task IndexGOGGames()
         {
-            string gogInstallation = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty).ToString();
+            var gogInstallationPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty);
+            string gogInstallation = gogInstallationPath is not null ? gogInstallationPath.ToString() : string.Empty;
+
             var handler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
             var games = handler.FindAllGames();
             foreach (var game in games)

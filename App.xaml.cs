@@ -11,9 +11,6 @@ using Windows.Management.Deployment;
 using Windows_Mobile.Types;
 using craftersmine.SteamGridDBNet;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace Windows_Mobile
 {
     /// <summary>

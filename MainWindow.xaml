@@ -23,6 +23,13 @@
             <DataTemplate x:Key="LauncherTemplate" x:DataType="local:StartMenuItem">
                 <Image ToolTipService.ToolTip="{x:Bind ItemName}" Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
             </DataTemplate>
+            <DataTemplate x:Key="ModTemplate" x:DataType="local:MCModInfo">
+                <StackPanel Orientation="Vertical">
+                    <Image Source="{x:Bind image}" />
+                    <TextBlock Text="{x:Bind name}" />
+                    <TextBlock Text="{x:Bind version}" />
+                </StackPanel>
+            </DataTemplate>
         </Grid.Resources>
         <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Rectangle.Fill>
@@ -101,5 +108,7 @@
                 <Vector3Transition />
             </Grid.TranslationTransition>
         </Grid>
+
+        <ListView HorizontalAlignment="Center" VerticalAlignment="Center" ItemsSource="{x:Bind mods}" ItemTemplate="{StaticResource ModTemplate}" />
     </Grid>
 </Window>
