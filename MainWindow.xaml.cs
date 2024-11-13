@@ -33,36 +33,9 @@ namespace Windows_Mobile
 {
     public sealed partial class MainWindow : Window
     {
-        ObservableCollection<MCModInfo> mods = [];
-
         public MainWindow()
         {
             this.InitializeComponent();
-
-            var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
-            foreach (string jar in jars)
-            {
-                using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
-                foreach (ZipEntry ze in zf)
-                {
-                    if (ze.Name.Contains(".mod.json"))
-                    {
-                        using Stream s = zf.GetInputStream(ze);
-                        StreamReader reader = new(s);
-                        string json = reader.ReadToEnd();
-                        var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
-                        mods.Add(modInfo);
-
-                        var entry = zf.GetEntry(modInfo.icon);
-                        using var stream = zf.GetInputStream(entry);
-                        using var randomStream = new MemoryStream();
-                        stream.CopyTo(randomStream);
-                        var bmp = new BitmapImage();
-                        bmp.SetSource(randomStream.AsRandomAccessStream());
-                        modInfo.image = bmp;
-                    } 
-                }
-            }
 
             Title = "Windows Mobile";
             AppWindow.SetPresenter(Microsoft.UI.Windowing.AppWindowPresenterKind.FullScreen);
@@ -81,9 +54,39 @@ namespace Windows_Mobile
             //await IndexEAGames();
             await IndexGOGGames();
             await IndexPackagedApps();
+            IndexMCMods();
             IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs");
             IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs");
             AddAppsToStartMenu();
+        }
+
+        ObservableCollection<MCModInfo> mods = [];
+        private void IndexMCMods()
+        {
+            if (Directory.Exists(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods"))
+            {
+                var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
+                foreach (string jar in jars)
+                {
+                    using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
+                    var ze = zf.FindEntry("fabric.mod.json", true);
+
+                    using Stream s = zf.GetInputStream(ze);
+                    StreamReader reader = new(s);
+                    string json = reader.ReadToEnd();
+                    var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
+
+                    var entry = zf.GetEntry(modInfo.icon);
+                    MemoryStream ms = new();
+                    zf.GetInputStream(entry).CopyTo(ms);
+                    ms.Position = 0;
+                    var bitmapImage = new BitmapImage();
+                    bitmapImage.SetSource(ms.AsRandomAccessStream());
+                    modInfo.image = bitmapImage;
+
+                    mods.Add(modInfo);
+                }
+            }
         }
 
         private async Task IndexSteamGames()
