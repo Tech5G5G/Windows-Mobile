@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows_Mobile.Types;
 
 namespace Windows_Mobile
@@ -18,6 +16,16 @@ namespace Windows_Mobile
                     return true;
             }
             return false;
+        }
+
+        public static BitmapImage ToBitmapImage(this Stream stream)
+        {
+            MemoryStream ms = new();
+            stream.CopyTo(ms);
+            ms.Position = 0;
+            var bitmapImage = new BitmapImage();
+            bitmapImage.SetSource(ms.AsRandomAccessStream());
+            return bitmapImage;
         }
     }
 }
