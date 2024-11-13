@@ -91,7 +91,8 @@ namespace Windows_Mobile
 
                         mods.Add(modInfo);
                     }
-                    //Add additional code to handle mods without a mod.json
+                    else
+                        mods.Add(new MCModInfo() { name = new FileInfo(jar).Name });
                 }
             }
         }
