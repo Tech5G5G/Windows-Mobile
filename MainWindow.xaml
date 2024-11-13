@@ -137,5 +137,6 @@
             </Grid.TranslationTransition>
         </Grid>
         <Button Click="Animation_Begin" />
+        <ListView ItemsSource="{x:Bind mods}" ItemTemplate="{StaticResource ModTemplate}" />
     </Grid>
 </Window>
