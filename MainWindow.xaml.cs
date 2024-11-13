@@ -498,6 +498,7 @@ namespace Windows_Mobile
         ObservableCollection<StartMenuItem> gamesList = [];
         ObservableCollection<StartMenuItem> launcherList = [];
         ObservableCollection<StartMenuItem> appsList = [];
+        ObservableCollection<StartMenuItem> allSearch = [];
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
