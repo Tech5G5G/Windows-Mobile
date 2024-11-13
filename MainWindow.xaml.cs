@@ -72,27 +72,49 @@ namespace Windows_Mobile
                         continue;
 
                     using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
-                    var ze = zf.FindEntry("fabric.mod.json", true);
 
+                    var ze = zf.FindEntry("fabric.mod.json", true);
                     if (ze != -1)
                     {
                         using Stream s = zf.GetInputStream(ze);
                         StreamReader reader = new(s);
                         string json = reader.ReadToEnd();
                         var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
+                        modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
 
-                        var entry = zf.GetEntry(modInfo.icon);
-                        MemoryStream ms = new();
-                        zf.GetInputStream(entry).CopyTo(ms);
-                        ms.Position = 0;
-                        var bitmapImage = new BitmapImage();
-                        bitmapImage.SetSource(ms.AsRandomAccessStream());
-                        modInfo.image = bitmapImage;
-
+                        modInfo.kind = ModKind.FabricQuilt;
                         mods.Add(modInfo);
                     }
                     else
-                        mods.Add(new MCModInfo() { name = new FileInfo(jar).Name });
+                    {
+                        ze = zf.FindEntry("META-INF/mods.toml", true);
+                        if (ze != -1)
+                        {
+                            using Stream s = zf.GetInputStream(ze);
+                            StreamReader reader = new(s);
+                            var table = Tommy.TOML.Parse(reader);
+                            var modInfoTOML = table["mods"].Children.First();
+
+                            var modInfo = new MCModInfo() { name = (string)modInfoTOML["displayName"], description = (string)modInfoTOML["description"], version = (string)modInfoTOML["version"], license = (string)table["license"], contact = new MCModContact() { homepage = (string)modInfoTOML["displayURL"], issues = (string)table["issueTrackerURL"] }, icon = (string)modInfoTOML["logoFile"], kind = ModKind.Forge };
+                            modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
+                            mods.Add(modInfo);
+                        }
+                        else
+                        {
+                            ze = zf.FindEntry("META-INF/neoforge.mods.toml", true);
+                            if (ze != -1)
+                            {
+                                using Stream s = zf.GetInputStream(ze);
+                                StreamReader reader = new(s);
+                                var table = Tommy.TOML.Parse(reader);
+                                var modInfoTOML = table["mods"].Children.First();
+
+                                var modInfo = new MCModInfo() { name = (string)modInfoTOML["displayName"], description = (string)modInfoTOML["description"], version = (string)modInfoTOML["version"], license = (string)table["license"], contact = new MCModContact() { homepage = (string)modInfoTOML["displayURL"], issues = (string)table["issueTrackerURL"] }, icon = (string)modInfoTOML["logoFile"], kind = ModKind.NeoForge };
+                                modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
+                                mods.Add(modInfo);
+                            }
+                        }
+                    }
                 }
             }
         }
