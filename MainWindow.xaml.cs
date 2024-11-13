@@ -657,11 +657,33 @@ namespace Windows_Mobile
             flyout.ShowAt(senderPanel, options);
         }
 
-        private void AutoSuggestBox_Tapped(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        private void TopAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            searchBoxBackground.Visibility = /*searchBoxBackground.Visibility == */Visibility.Visible/* ? Visibility.Collapsed : Visibility.Visible*/;
+            searchBoxBackground.Visibility = !string.IsNullOrWhiteSpace(sender.Text) ? Visibility.Visible : Visibility.Collapsed;
+            searchBox.Translation = !string.IsNullOrWhiteSpace(sender.Text) ? new Vector3(0, (AppWindow.Size.Height / 2) - 300, 0) : Vector3.Zero;
+            sender.CornerRadius = !string.IsNullOrWhiteSpace(sender.Text) ? new CornerRadius(4) : new CornerRadius(20);
 
-            searchBox.Translation = new Vector3(0, (AppWindow.Size.Height / 2) - 300, 0);
+            var filteredUnordered = allApps.Where(entry => Filter(entry, sender.Text));
+            var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
+
+            for (int i = allSearch.Count - 1; i >= 0; i--)
+            {
+                var item = allSearch[i];
+
+                if (!filtered.Contains(item))
+                    allSearch.Remove(item);
+            }
+
+            foreach (StartMenuItem item in filtered)
+            {
+                if (!allSearch.Contains(item))
+                    allSearch.Add(item);
+            }
+        }
+
+        private void Animation_Begin(object sender, RoutedEventArgs e)
+        {
+            myStoryboard.Begin();
         }
     }
 }
