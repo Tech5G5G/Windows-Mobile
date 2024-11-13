@@ -52,10 +52,11 @@ public class MCModInfo
     public string name { get; set; }
     public string version { get; set; }
     public string description { get; set; }
-    public string icon { get; set; }
     public string license { get; set; }
     public MCModContact contact { get; set; }
 
+    /// <summary>Path to icon</summary>
+    public string icon { get; set; }
     public BitmapImage image { get; set; }
 }
 
