@@ -94,5 +94,12 @@
         <Grid Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Margin="8" Height="54" HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <GridView ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
         </Grid>
+        <Grid x:Name="searchBox" VerticalAlignment="Top" Margin="3">
+            <Rectangle x:Name="searchBoxBackground" Visibility="Collapsed" Fill="{ThemeResource AcrylicInAppFillColorBaseBrush}" Stroke="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" RadiusX="8" RadiusY="8" Width="698" Height="600" />
+            <AutoSuggestBox Height="40" FontSize="15" CornerRadius="20" BorderThickness="0" Margin="4,12" Width="674" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search" QueryIcon="Find" TextChanged="AutoSuggestBox_Tapped" />
+            <Grid.TranslationTransition>
+                <Vector3Transition />
+            </Grid.TranslationTransition>
+        </Grid>
     </Grid>
 </Window>

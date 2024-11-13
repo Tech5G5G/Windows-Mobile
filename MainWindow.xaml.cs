@@ -625,5 +625,12 @@ namespace Windows_Mobile
 
             flyout.ShowAt(senderPanel, options);
         }
+
+        private void AutoSuggestBox_Tapped(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            searchBoxBackground.Visibility = /*searchBoxBackground.Visibility == */Visibility.Visible/* ? Visibility.Collapsed : Visibility.Visible*/;
+
+            searchBox.Translation = new Vector3(0, (AppWindow.Size.Height / 2) - 300, 0);
+        }
     }
 }
