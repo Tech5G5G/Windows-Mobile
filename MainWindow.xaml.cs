@@ -28,6 +28,8 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Diagnostics;
+using System.Windows.Media.Animation;
+using CommunityToolkit.WinUI.UI.Animations;
 
 namespace Windows_Mobile
 {
@@ -44,7 +46,7 @@ namespace Windows_Mobile
             startNV.SelectedItem = games_NavItem;
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            PopulateStartMenu();
+            //PopulateStartMenu();
         }
 
         private async void PopulateStartMenu()
@@ -711,21 +713,27 @@ namespace Windows_Mobile
             }
         }
 
+        private bool Animated { get; set; }
         private void Animation_Begin(object sender, RoutedEventArgs e)
         {
-            var preHeight = menuBar.ActualHeight;
-            var preWidth = menuBar.ActualWidth;
-            menuBar.Width = preWidth;
-            menuBar.HorizontalAlignment = HorizontalAlignment.Center;
-
-            myStoryboard.Begin();
-            myStoryboard.Completed += (sender, args) => 
+            if (Animated)
             {
-                myStoryboard.Stop();
-
-                menuBar.Height = preHeight * 10;
-                menuBar.Width = preWidth / 2;
-            };
+                var preHeight = menuBar.ActualHeight;
+                var preWidth = menuBar.ActualWidth;
+                var animationBuilder = AnimationBuilder.Create();
+                animationBuilder.Size(axis: Axis.X, to: preWidth * 3, from: preWidth, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: preHeight / 12, from: preHeight, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                Animated = false;
+            }
+            else
+            {
+                var preHeight = menuBar.ActualHeight;
+                var preWidth = menuBar.ActualWidth;
+                var animationBuilder = AnimationBuilder.Create();
+                animationBuilder.Size(axis: Axis.X, to: preWidth / 3, from: preWidth, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: preHeight * 12, from: preHeight, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                Animated = true;
+            }
         }
     }
 }
