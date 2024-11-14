@@ -46,7 +46,7 @@ namespace Windows_Mobile
             startNV.SelectedItem = games_NavItem;
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            //PopulateStartMenu();
+            PopulateStartMenu();
         }
 
         private async void PopulateStartMenu()
@@ -689,11 +689,42 @@ namespace Windows_Mobile
             flyout.ShowAt(senderPanel, options);
         }
 
+        //Also make it so that the search thing wraps to the listview, which should have a max height. Also, fix topautosuggestbox from shaking
+        private bool? Animated { get; set; } = null;
+        private DoubleSize OriginalSize { get; set; }
         private void TopAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            searchBoxBackground.Visibility = !string.IsNullOrWhiteSpace(sender.Text) ? Visibility.Visible : Visibility.Collapsed;
-            searchBox.Translation = !string.IsNullOrWhiteSpace(sender.Text) ? new Vector3(0, (AppWindow.Size.Height / 2) - 300, 0) : Vector3.Zero;
-            sender.CornerRadius = !string.IsNullOrWhiteSpace(sender.Text) ? new CornerRadius(4) : new CornerRadius(20);
+            if (Animated == true && string.IsNullOrWhiteSpace(sender.Text))
+            {
+                launcherGrid.Visibility = Visibility.Visible;
+                allSearchList.Visibility = Visibility.Collapsed;
+                sender.CornerRadius = new CornerRadius(20);
+                var animationBuilder = AnimationBuilder.Create();
+                animationBuilder.Size(axis: Axis.X, to: OriginalSize.X, from: 698, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: OriginalSize.Y, from: 600, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                Animated = false;
+            }
+            else if (Animated == false && !string.IsNullOrWhiteSpace(sender.Text))
+            {
+                launcherGrid.Visibility = Visibility.Collapsed;
+                allSearchList.Visibility = Visibility.Visible;
+                sender.CornerRadius = new CornerRadius(4);
+                var animationBuilder = AnimationBuilder.Create();
+                animationBuilder.Size(axis: Axis.X, to: 698, from: OriginalSize.X, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: 600, from: OriginalSize.Y, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                Animated = true;
+            }
+            else if (Animated is null)
+            {
+                OriginalSize = new(menuBar.ActualWidth, menuBar.ActualHeight);
+                
+                launcherGrid.Visibility = Visibility.Collapsed;
+                allSearchList.Visibility = Visibility.Visible;
+                var animationBuilder = AnimationBuilder.Create();
+                animationBuilder.Size(axis: Axis.X, to: 698, from: OriginalSize.X, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: 600, from: OriginalSize.Y, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                Animated = true;
+            }
 
             var filteredUnordered = allApps.Where(entry => Filter(entry, sender.Text));
             var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
@@ -710,29 +741,6 @@ namespace Windows_Mobile
             {
                 if (!allSearch.Contains(item))
                     allSearch.Add(item);
-            }
-        }
-
-        private bool Animated { get; set; }
-        private void Animation_Begin(object sender, RoutedEventArgs e)
-        {
-            if (Animated)
-            {
-                var preHeight = menuBar.ActualHeight;
-                var preWidth = menuBar.ActualWidth;
-                var animationBuilder = AnimationBuilder.Create();
-                animationBuilder.Size(axis: Axis.X, to: preWidth * 3, from: preWidth, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: preHeight / 12, from: preHeight, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                Animated = false;
-            }
-            else
-            {
-                var preHeight = menuBar.ActualHeight;
-                var preWidth = menuBar.ActualWidth;
-                var animationBuilder = AnimationBuilder.Create();
-                animationBuilder.Size(axis: Axis.X, to: preWidth / 3, from: preWidth, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: preHeight * 12, from: preHeight, duration: TimeSpan.FromSeconds(1), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                Animated = true;
             }
         }
     }
