@@ -689,7 +689,7 @@ namespace Windows_Mobile
             flyout.ShowAt(senderPanel, options);
         }
 
-        //Also make it so that the search thing wraps to the listview, which should have a max height. Also, fix topautosuggestbox from shaking
+        //Also make it so that the search thing wraps to the listview, which should have a max height. Also, fix topautosuggestbox from shaking; Add animation to searchbox moving
         private bool? Animated { get; set; } = null;
         private DoubleSize OriginalSize { get; set; }
         private void TopAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -720,6 +720,7 @@ namespace Windows_Mobile
                 
                 launcherGrid.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
+                sender.CornerRadius = new CornerRadius(4);
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: 698, from: OriginalSize.X, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 animationBuilder.Size(axis: Axis.Y, to: 600, from: OriginalSize.Y, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
@@ -742,6 +743,16 @@ namespace Windows_Mobile
                 if (!allSearch.Contains(item))
                     allSearch.Add(item);
             }
+        }
+
+        private void Open_Time(object sender, RoutedEventArgs args)
+        {
+            Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
+        }
+
+        private void Open_ControlCenter(object sender, RoutedEventArgs args)
+        {
+            Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
         }
     }
 }
