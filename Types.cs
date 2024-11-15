@@ -75,10 +75,3 @@ public enum ModKind
     Forge,
     NeoForge
 }
-
-///<summary>Represents two doubles via X and Y</summary>
-public class DoubleSize(double X, double Y)
-{
-    public double X { get; set; } = X;
-    public double Y { get; set; } = Y;
-}
