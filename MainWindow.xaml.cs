@@ -702,6 +702,7 @@ namespace Windows_Mobile
             }
         }
 
+        //Reduce starting width of top search box and animate to be bigger when text starts being inputed
         private bool? Animated { get; set; } = null;
         private Windows.Foundation.Size OriginalSize { get; set; }
         private void TopAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
