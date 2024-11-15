@@ -106,7 +106,7 @@
             <Button x:Name="time" Click="Open_Time" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="80" Content="DateTime" />
             <Button x:Name="controlCenter" Click="Open_ControlCenter" Margin="0,0,80,0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="ControlCenter" Height="40" Width="80" Content="ControlCenter" />
         </Grid>
-        <AutoSuggestBox Height="40" FontSize="15" CornerRadius="20" BorderThickness="0" Margin="4,15" Width="674" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search" QueryIcon="Find" TextChanged="TopAutoSuggestBox_TextChanged">
+        <AutoSuggestBox Height="40" FontSize="15" CornerRadius="20" BorderThickness="0" Margin="4,15" Width="400" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search" QueryIcon="Find" TextChanged="TopAutoSuggestBox_TextChanged">
             <AutoSuggestBox.TranslationTransition>
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
