@@ -101,37 +101,11 @@
             </StackPanel>
         </Grid>
         <Grid x:Name="menuBar" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Margin="8" Height="54" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-            <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}">
-                <animations:Implicit.HideAnimations>
-                    <animations:OpacityAnimation Duration="0:0:0.5" From="0" To="1">
-                        <animations:ScalarKeyFrame Key="0" Value="1" />
-                        <animations:ScalarKeyFrame Key="1" Value="0" />
-                    </animations:OpacityAnimation>
-                </animations:Implicit.HideAnimations>
-                <animations:Implicit.ShowAnimations>
-                    <animations:OpacityAnimation Duration="0:0:0.5" From="0" To="1">
-                        <animations:ScalarKeyFrame Key="0" Value="0" />
-                        <animations:ScalarKeyFrame Key="1" Value="1" />
-                    </animations:OpacityAnimation>
-                </animations:Implicit.ShowAnimations>
-            </GridView>
-            <AutoSuggestBox Height="40" FontSize="15" CornerRadius="20" BorderThickness="0" Margin="4,6" Width="674" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search" QueryIcon="Find" TextChanged="TopAutoSuggestBox_TextChanged" />
-            <ListView x:Name="allSearchList" Margin="0,62,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}">
-                <animations:Implicit.HideAnimations>
-                    <animations:OpacityAnimation Duration="0:0:0.5" From="0" To="1">
-                        <animations:ScalarKeyFrame Key="0" Value="1" />
-                        <animations:ScalarKeyFrame Key="1" Value="0" />
-                    </animations:OpacityAnimation>
-                </animations:Implicit.HideAnimations>
-                <animations:Implicit.ShowAnimations>
-                    <animations:OpacityAnimation Duration="0:0:0.5" From="0" To="1">
-                        <animations:ScalarKeyFrame Key="0" Value="0" />
-                        <animations:ScalarKeyFrame Key="1" Value="1" />
-                    </animations:OpacityAnimation>
-                </animations:Implicit.ShowAnimations>
-            </ListView>
-            <Button Click="Open_Time" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="80" Content="DateTime" />
-            <Button Click="Open_ControlCenter" Margin="0,0,80,0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="ControlCenter" Height="40" Width="80" Content="ControlCenter" />
+            <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
+            <!--Bind the scrollviewer verticalscrollmode so it can be dis and enabled-->
+            <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
+            <Button x:Name="time" Click="Open_Time" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="80" Content="DateTime" />
+            <Button x:Name="controlCenter" Click="Open_ControlCenter" Margin="0,0,80,0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="ControlCenter" Height="40" Width="80" Content="ControlCenter" />
         </Grid>
     </Grid>
 </Window>
