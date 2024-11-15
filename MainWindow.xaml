@@ -32,22 +32,6 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <Storyboard x:Name="myStoryboard">
-                <DoubleAnimation From="1" To="10" Duration="00:00:0.5" 
-                        Storyboard.TargetName="menuBarScaleTransform" 
-                        Storyboard.TargetProperty="ScaleY">
-                    <DoubleAnimation.EasingFunction>
-                        <PowerEase />
-                    </DoubleAnimation.EasingFunction>
-                </DoubleAnimation>
-                <DoubleAnimation From="1" To="0.5" Duration="00:00:0.5" 
-                        Storyboard.TargetName="menuBarScaleTransform" 
-                        Storyboard.TargetProperty="ScaleX">
-                    <DoubleAnimation.EasingFunction>
-                        <PowerEase />
-                    </DoubleAnimation.EasingFunction>
-                </DoubleAnimation>
-            </Storyboard>
         </Grid.Resources>
         <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Rectangle.Fill>
