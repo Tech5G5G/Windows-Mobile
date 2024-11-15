@@ -522,9 +522,18 @@ namespace Windows_Mobile
         private void GameView_Click(object sender, RoutedEventArgs e) => taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = (NavigationViewItem)args.SelectedItem == games_NavItem ? gamesList : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? launcherList : appsList });
-            autoSuggestBox.PlaceholderText = (NavigationViewItem)args.SelectedItem == games_NavItem ? "Search games" : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? "Search launchers" : "Search apps";
-            autoSuggestBox.Text = null;
+            if ((NavigationViewItem)args.SelectedItem != mc_NavItem)
+            {
+                apps.ItemTemplate = (this.Content as Grid).Resources["StartMenuItemTemplate"] as DataTemplate;
+                apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = (NavigationViewItem)args.SelectedItem == games_NavItem ? gamesList : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? launcherList : appsList });
+                autoSuggestBox.PlaceholderText = (NavigationViewItem)args.SelectedItem == games_NavItem ? "Search games" : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? "Search launchers" : "Search apps";
+                autoSuggestBox.Text = null;
+            }
+            else
+            {
+                apps.ItemTemplate = (this.Content as Grid).Resources["ModTemplate"] as DataTemplate;
+                apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = mods });
+            }
         }
 
         ObservableCollection<StartMenuItem> allApps = [];

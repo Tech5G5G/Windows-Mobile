@@ -26,9 +26,15 @@
             <DataTemplate x:Key="ModTemplate" x:DataType="local:MCModInfo">
                 <StackPanel Orientation="Horizontal">
                     <Image Height="50" Width="50" Source="{x:Bind image}" />
-                    <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" Margin="8,0,0,0">
                         <TextBlock Text="{x:Bind name}" />
                         <TextBlock Text="{x:Bind version}" Foreground="{ThemeResource TextFillColorSecondary}" />
+                        <TextBlock Text="{x:Bind description}" Foreground="{ThemeResource TextFillColorSecondary}" />
+                        <TextBlock Text="{x:Bind license}" Foreground="{ThemeResource TextFillColorSecondary}" />
+
+                        <TextBlock Text="{x:Bind contact.homepage}" Foreground="{ThemeResource TextFillColorSecondary}" />
+                        <TextBlock Text="{x:Bind contact.sources}" Foreground="{ThemeResource TextFillColorSecondary}" />
+                        <TextBlock Text="{x:Bind contact.issues}" Foreground="{ThemeResource TextFillColorSecondary}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
@@ -50,6 +56,9 @@
                         <NavigationViewItem Content="Launchers" x:Name="launchers_NavItem" />
                         <NavigationViewItem Content="Apps" x:Name="apps_NavItem" />
                     </NavigationView.MenuItems>
+                    <NavigationView.FooterMenuItems>
+                        <NavigationViewItem Content="Minecraft" x:Name="mc_NavItem" />
+                    </NavigationView.FooterMenuItems>
                     <NavigationView.Resources>
                         <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                         <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
