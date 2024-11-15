@@ -27,5 +27,17 @@ namespace Windows_Mobile
             bitmapImage.SetSource(ms.AsRandomAccessStream());
             return bitmapImage;
         }
+
+        public static int Clamp(this int input, int max, int min = 0)
+        {
+            if (input >= min && input <= max)
+                return input;
+            else if (input > max)
+                return max;
+            else if (input < min)
+                return min;
+            else
+                throw new Exception("Unable to compare value of input");
+        }
     }
 }
