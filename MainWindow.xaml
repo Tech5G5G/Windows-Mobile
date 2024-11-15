@@ -102,7 +102,6 @@
         </Grid>
         <Grid x:Name="menuBar" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Margin="8" Height="54" HorizontalAlignment="Stretch" VerticalAlignment="Top">
             <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
-            <!--Bind the scrollviewer verticalscrollmode so it can be dis and enabled-->
             <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
             <Button x:Name="time" Click="Open_Time" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="80" Content="DateTime" />
             <Button x:Name="controlCenter" Click="Open_ControlCenter" Margin="0,0,80,0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="ControlCenter" Height="40" Width="80" Content="ControlCenter" />
