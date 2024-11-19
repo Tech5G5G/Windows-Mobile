@@ -4,34 +4,19 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Core;
-using Windows.Management.Deployment;
-using Microsoft.WindowsAPICodePack.Shell;
-using System.Drawing.Imaging;
-using System.Drawing;
-using Windows.ApplicationModel;
-using craftersmine.SteamGridDBNet;
-using NexusMods.Paths;
-using Windows_Mobile.Types;
-using System.Text.Json;
-using GameFinder.RegistryUtils;
-using GameFinder.StoreHandlers.GOG;
-using GameFinder.StoreHandlers.Steam;
-using craftersmine.SteamGridDBNet.Exceptions;
-using Microsoft.Win32;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using ICSharpCode.SharpZipLib.Zip;
 using System.Diagnostics;
 using CommunityToolkit.WinUI.UI.Animations;
 using Windows.Networking.Connectivity;
 using Windows.Devices.Power;
-using Windows.Services.Maps;
+using CoreAudio;
+using Windows_Mobile.Indexing;
+using Windows_Mobile.Networking;
+using Windows_Mobile.MC;
 
 namespace Windows_Mobile
 {
@@ -47,48 +32,71 @@ namespace Windows_Mobile
             startMenu.Height = (AppWindow.Size.Height * 7) / 8;
             startNV.SelectedItem = games_NavItem;
 
-            wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            PopulateStartMenu();
-
             allSearch.CollectionChanged += (sender, e) => MenuBar_HeightUpdate();
+            wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
+            
+            PopulateStartMenu();
+            Set_ControlCenterIcons();
+        }
 
-            NetworkProfile = NetworkInformation.GetInternetConnectionProfile();
-            Set_NetworkInfo(NetworkProfile?.GetSignalBars());
-            //Test if this updates when the network level changes, add support for ethernet
+        private void Set_ControlCenterIcons()
+        {
+            var profile = NetworkInformation.GetInternetConnectionProfile();
+            Set_NetworkInfo(profile.GetNetworkType(), profile?.ProfileName);
             NetworkInformation.NetworkStatusChanged += (sender) =>
             {
-                NetworkProfile = NetworkInformation.GetInternetConnectionProfile();
-                Set_NetworkInfo(NetworkProfile?.GetSignalBars());
+                var profile = NetworkInformation.GetInternetConnectionProfile();
+                Set_NetworkInfo(profile.GetNetworkType(), profile?.ProfileName);
             };
 
-            var device = new CoreAudio.MMDeviceEnumerator(Guid.NewGuid()).GetDefaultAudioEndpoint(CoreAudio.DataFlow.Render, CoreAudio.Role.Multimedia);
+            device = new MMDeviceEnumerator(Guid.NewGuid()).GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
             device.AudioEndpointVolume.OnVolumeNotification += (data) => Set_VolumeLevel((int)Math.Ceiling(data.MasterVolume * 100), data.Muted);
-            Set_VolumeLevel((int)Math.Ceiling(device.AudioEndpointVolume.MasterVolumeLevel * 100), device.AudioEndpointVolume.Mute);
+            Set_VolumeLevel((int)Math.Ceiling(device.AudioEndpointVolume.MasterVolumeLevelScalar * 100), device.AudioEndpointVolume.Mute);
 
             var aggregate = Battery.AggregateBattery;
             var report = aggregate.GetReport();
-            Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, report.Status == Windows.System.Power.BatteryStatus.Charging);
+            var powerStatus = System.Windows.Forms.SystemInformation.PowerStatus.PowerLineStatus;
+            Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, powerStatus == System.Windows.Forms.PowerLineStatus.Online);
             aggregate.ReportUpdated += (sender, e) =>
             {
                 var report = sender.GetReport();
-                Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, report.Status == Windows.System.Power.BatteryStatus.Charging);
+                var powerStatus = System.Windows.Forms.SystemInformation.PowerStatus.PowerLineStatus;
+                Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, powerStatus == System.Windows.Forms.PowerLineStatus.Online);
             };
         }
 
+        private static MMDevice device;
         private void Set_VolumeLevel(int volumeLevel, bool muted)
         {
             this.DispatcherQueue.TryEnqueue(() =>
             {
-                ToolTipService.SetToolTip(this.volumeLevel, muted ? "Muted" : $"{volumeLevel}% volume");
+                if (muted)
+                { 
+                    ToolTipService.SetToolTip(volumeLevelContainer, "Muted");
+                    volumeBackground.Visibility = Visibility.Collapsed;
+                    this.volumeLevel.Glyph = "\uE74F";
+                }
+                else
+                {
+                    ToolTipService.SetToolTip(volumeLevelContainer, $"{volumeLevel}% volume");
+                    volumeBackground.Visibility = Visibility.Visible;
+                    this.volumeLevel.Glyph = volumeLevel switch
+                    {
+                        > 66 => "\uE995",
+                        > 33 => "\uE994",
+                        > 0 => "\uE993",
+                        _ => "\uE992"
+                    };
+                }
             });
         }
 
-        private void Set_BatteryLevel(int? remainingCapacity, int? totalCapacity, bool charging /*bool batterySaver = false*/)
+        private void Set_BatteryLevel(int? remainingCapacity, int? totalCapacity, bool charging)
         {
             var percentCharged = (int)(((double)remainingCapacity / (double)totalCapacity) * 100);
             this.DispatcherQueue.TryEnqueue(() =>
             {
-                ToolTipService.SetToolTip(batteryLevel, $"{percentCharged}% remaining");
+                ToolTipService.SetToolTip(batteryLevel, percentCharged == 100 ? "Fully charged 100%" : $"{percentCharged}% remaining");
 
                 if (charging)
                 {
@@ -129,401 +137,33 @@ namespace Windows_Mobile
             });
         }
 
-        private void Set_NetworkInfo(byte? level)
+        private void Set_NetworkInfo(NetworkType type, string name)
         {
             this.DispatcherQueue.TryEnqueue(() =>
             {
-                ToolTipService.SetToolTip(networkIconContainer, NetworkProfile?.ProfileName);
-
-                if (level is null)
+                ToolTipService.SetToolTip(networkIcon, name);
+                networkIcon.Glyph = type switch
                 {
-                    networkBackground.Visibility = Visibility.Collapsed;
-                    networkIconForeground.Visibility = Visibility.Visible;
-                    networkIcon.Glyph = "\uF385";
-                }
-                else
-                {
-                    networkBackground.Visibility = Visibility.Visible;
-                    networkIconForeground.Visibility = Visibility.Collapsed;
-                    networkIcon.Glyph = level switch
-                    {
-                        1 => "\uE872",
-                        2 => "\uE873",
-                        3 => "\uE874",
-                        _ => "\uE701"
-                    };
-                }
+                    NetworkType.WiFi => "\uE701",
+                    NetworkType.Ethernet => "\uE839",
+                    NetworkType.Cellular => "\uEC3B",
+                    NetworkType.None => "\uF384",
+                    _ => "\uF384"
+                };
             });
         }
-        public static ConnectionProfile NetworkProfile { get; set; }
 
         private async void PopulateStartMenu()
         {
-            await IndexSteamGames();
-            await IndexEGSGames();
-            //await IndexEAGames();
-            await IndexGOGGames();
-            await IndexPackagedApps();
-            IndexMCMods();
-            IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs");
-            IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs");
+            await Indexers.IndexSteamGames(allApps);
+            await Indexers.IndexEGSGames(allApps);
+            //await Indexers.IndexEAGames(allApps);
+            await Indexers.IndexGOGGames(allApps);
+            await Indexers.IndexPackagedApps(allApps);
+            Indexers.IndexMCMods(mods);
+            Indexers.IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
+            Indexers.IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
             AddAppsToStartMenu();
-        }
-
-        ObservableCollection<MCModInfo> mods = [];
-        private void IndexMCMods()
-        {
-            if (Directory.Exists(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods"))
-            {
-                var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
-                foreach (string jar in jars)
-                {
-                    if (!jar.EndsWith(".jar", StringComparison.InvariantCultureIgnoreCase))
-                        continue;
-
-                    using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
-
-                    var ze = zf.FindEntry("fabric.mod.json", true);
-                    if (ze != -1)
-                    {
-                        using Stream s = zf.GetInputStream(ze);
-                        StreamReader reader = new(s);
-                        string json = reader.ReadToEnd();
-                        var modInfo = JsonSerializer.Deserialize<MCModInfo>(json);
-                        modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
-
-                        modInfo.kind = ModKind.FabricQuilt;
-                        mods.Add(modInfo);
-                    }
-                    else
-                    {
-                        ze = zf.FindEntry("META-INF/mods.toml", true);
-                        if (ze != -1)
-                        {
-                            using Stream s = zf.GetInputStream(ze);
-                            StreamReader reader = new(s);
-                            var table = Tommy.TOML.Parse(reader);
-                            var modInfoTOML = table["mods"].Children.First();
-
-                            var modInfo = new MCModInfo() { name = (string)modInfoTOML["displayName"], description = (string)modInfoTOML["description"], version = (string)modInfoTOML["version"], license = (string)table["license"], contact = new MCModContact() { homepage = (string)modInfoTOML["displayURL"], issues = (string)table["issueTrackerURL"] }, icon = (string)modInfoTOML["logoFile"], kind = ModKind.Forge };
-                            modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
-                            mods.Add(modInfo);
-                        }
-                        else
-                        {
-                            ze = zf.FindEntry("META-INF/neoforge.mods.toml", true);
-                            if (ze != -1)
-                            {
-                                using Stream s = zf.GetInputStream(ze);
-                                StreamReader reader = new(s);
-                                var table = Tommy.TOML.Parse(reader);
-                                var modInfoTOML = table["mods"].Children.First();
-
-                                var modInfo = new MCModInfo() { name = (string)modInfoTOML["displayName"], description = (string)modInfoTOML["description"], version = (string)modInfoTOML["version"], license = (string)table["license"], contact = new MCModContact() { homepage = (string)modInfoTOML["displayURL"], issues = (string)table["issueTrackerURL"] }, icon = (string)modInfoTOML["logoFile"], kind = ModKind.NeoForge };
-                                modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
-                                mods.Add(modInfo);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private async Task IndexSteamGames()
-        {
-            var handler = new SteamHandler(FileSystem.Shared, WindowsRegistry.Shared);
-            var games = handler.FindAllGames();
-            foreach (var game in games)
-            {
-                var steamGame = game.Value as SteamGame;
-                if (steamGame is not null && steamGame.AppId.Value != 228980) 
-                {
-                    SteamGridDbGame gameInfo = null;
-                    BitmapImage bitmapImage = new();
-                    try
-                    {
-                        gameInfo = await App.db.GetGameBySteamIdAsync((int)steamGame.AppId.Value);
-                    }
-                    catch (SteamGridDbNotFoundException)
-                    {
-                        gameInfo = (await App.db.SearchForGamesAsync(steamGame.Name)).First();
-                    }
-
-                    var image = await App.db.GetIconsForGameAsync(gameInfo);
-                    if (image.Length != 0)
-                        bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
-                    else
-                    {
-                        using var stream = new MemoryStream();
-                        Icon.ExtractAssociatedIcon(Directory.GetFiles(steamGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
-                        stream.Position = 0;
-                        bitmapImage.SetSource(stream.AsRandomAccessStream());
-                    }
-
-                    var MenuItem = new StartMenuItem()
-                    {
-                        ItemName = steamGame.Name,
-                        ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
-                        ItemKind = ApplicationKind.SteamGame,
-                        Icon = bitmapImage,
-                        GameInfo = gameInfo,
-                        Id = steamGame.AppId.Value.ToString()
-                    };
-                    allApps.Add(MenuItem);
-                }
-            }
-        }
-
-        private async Task IndexEGSGames()
-        {
-            if (Directory.Exists("C:\\ProgramData\\Epic\\EpicGamesLauncher\\Data\\Manifests"))
-            {
-                var apps = Directory.GetFiles("C:\\ProgramData\\Epic\\EpicGamesLauncher\\Data\\Manifests");
-                foreach (var app in apps)
-                {
-                    var appInfo = JsonSerializer.Deserialize<EGSGameInfo>(File.ReadAllText(app));
-                    BitmapImage bitmapImage = new();
-
-                    SteamGridDbGame game = (await App.db.SearchForGamesAsync(appInfo.DisplayName)).First();
-                    var image = await App.db.GetIconsForGameAsync(game);
-                    if (image.Length != 0)
-                        bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
-                    else
-                    {
-                        using var stream = new MemoryStream();
-                        Icon.ExtractAssociatedIcon(appInfo.InstallLocation + "/" + appInfo.LaunchExecutable).ToBitmap().Save(stream, ImageFormat.Png);
-                        stream.Position = 0;
-                        bitmapImage.SetSource(stream.AsRandomAccessStream());
-                    }
-
-                    var MenuItem = new StartMenuItem()
-                    {
-                        ItemName = appInfo.DisplayName,
-                        ItemStartURI = "com.epicgames.launcher://apps/" + appInfo.CatalogNamespace + "%3A" + appInfo.CatalogItemId + "%3A" + appInfo.AppName + "?action=launch&silent=true",
-                        ItemKind = ApplicationKind.EpicGamesGame,
-                        Icon = bitmapImage,
-                        GameInfo = game
-                    };
-                    allApps.Add(MenuItem);
-                }
-            }
-            else
-                return;
-        }
-
-        //private async Task IndexEAGames()
-        //{
-        //    var eHandler = new EADesktopHandler(FileSystem.Shared, new HardwareInfoProvider());
-        //    var eGames = eHandler.FindAllGames();
-        //    foreach (var game in eGames)
-        //    {
-        //        var eGame = game.Value as EADesktopGame;
-        //        SteamGridDbGame gameInfo = null;
-        //        BitmapImage bitmapImage = new();
-
-        //        gameInfo = (await db.SearchForGamesAsync(eGame.BaseSlug)).First();
-
-        //        var image = await db.GetIconsForGameAsync(gameInfo);
-        //        if (image.Length != 0)
-        //            bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
-        //        else
-        //        {
-        //            using var stream = new MemoryStream();
-        //            Icon.ExtractAssociatedIcon(Directory.GetFiles(eGame.BaseInstallPath.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
-        //            stream.Position = 0;
-        //            bitmapImage.SetSource(stream.AsRandomAccessStream());
-        //        }
-
-        //        var MenuItem = new StartMenuItem()
-        //        {
-        //            ItemName = eGame.BaseSlug,
-        //            ItemStartURI = "steam://rungameid/" + steamGame.AppId.Value,
-        //            ItemKind = ApplicationKind.,
-        //            Icon = bitmapImage,
-        //            GameInfo = gameInfo
-        //        };
-        //        allApps.Add(MenuItem);
-        //    }
-        //}
-
-        private async Task IndexGOGGames()
-        {
-            var gogInstallationPath = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\GOG.com\\GalaxyClient\\paths", "client", string.Empty);
-            string gogInstallation = gogInstallationPath is not null ? gogInstallationPath.ToString() : string.Empty;
-
-            var handler = new GOGHandler(WindowsRegistry.Shared, FileSystem.Shared);
-            var games = handler.FindAllGames();
-            foreach (var game in games)
-            {
-                var gogGame = game.Value as GOGGame;
-                if (gogGame is not null)
-                {
-                    SteamGridDbGame gameInfo = (await App.db.SearchForGamesAsync(gogGame.Name)).First();
-                    BitmapImage bitmapImage = new();
-
-                    var image = await App.db.GetIconsForGameAsync(gameInfo);
-                    if (image.Length != 0)
-                        bitmapImage.UriSource = new Uri(image[0].FullImageUrl);
-                    else
-                    {
-                        using var stream = new MemoryStream();
-                        Icon.ExtractAssociatedIcon(Directory.GetFiles(gogGame.Path.ToString()).First(i => i.EndsWith(".exe"))).ToBitmap().Save(stream, ImageFormat.Png);
-                        stream.Position = 0;
-                        bitmapImage.SetSource(stream.AsRandomAccessStream());
-                    }
-
-                    var MenuItem = new StartMenuItem()
-                    {
-                        ItemName = gogGame.Name,
-                        ItemStartURI = $"\"{gogInstallation}\\GalaxyClient.exe\" /command=runGame /gameId={gogGame.Id.Value} /path=\"{gogGame.Path}\"",
-                        ItemKind = ApplicationKind.GOGGame,
-                        Icon = bitmapImage,
-                        GameInfo = gameInfo,
-                        Id = gogGame.Id.Value.ToString()
-                    };
-                    allApps.Add(MenuItem);
-                }
-            }
-        }
-
-        private static string[] IndexFolder(string folderPath)
-        {
-            string[] files = Directory.GetFiles(folderPath);
-
-            string[] subDirectories = Directory.GetDirectories(folderPath);
-            if (subDirectories.Length != 0)
-            {
-                foreach (string directory in subDirectories)
-                {
-                    string[] subfiles = IndexFolder(directory);
-                    foreach (string subfile in subfiles)
-                        files = [.. files, subfile];
-                }
-            }
-
-            return files;
-        }
-
-        private async Task IndexPackagedApps()
-        {
-            PackageManager packageManager = new();
-            IEnumerable<Package> packages = packageManager.FindPackagesForUser(string.Empty);
-
-            foreach (Package package in packages)
-            {
-                if (File.Exists(package.InstalledPath + "\\MicrosoftGame.Config"))
-                {
-                    var serilizer = new System.Xml.Serialization.XmlSerializer(typeof(Game));
-                    var reader = new StreamReader(package.InstalledPath + "\\MicrosoftGame.Config");
-                    var productId = (Game)serilizer.Deserialize(reader);
-
-                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-
-                    foreach (AppListEntry appListEntry in appListEntries)
-                    {
-                        var MenuItem = new StartMenuItem()
-                        {
-                            ItemName = appListEntry.DisplayInfo.DisplayName,
-                            ItemStartURI = package.Id.FullName,
-                            ItemKind = ApplicationKind.XboxGame,
-                            Icon = new BitmapImage() { UriSource = package.Logo },
-                            GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First(),
-                            Id = productId.StoreId
-                        };
-                        allApps.Add(MenuItem);
-                    }
-                }
-                else if (File.Exists(package.InstalledPath + "\\xboxservices.config"))
-                {
-                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-
-                    foreach (AppListEntry appListEntry in appListEntries)
-                    {
-                        var MenuItem = new StartMenuItem()
-                        {
-                            ItemName = appListEntry.DisplayInfo.DisplayName,
-                            ItemStartURI = package.Id.FullName,
-                            ItemKind = ApplicationKind.XboxGame,
-                            Icon = new BitmapImage() { UriSource = package.Logo },
-                            GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
-                        };
-                        allApps.Add(MenuItem);
-                    }
-                }
-                else if (!package.IsResourcePackage && !package.IsFramework && !package.IsStub && !package.IsBundle)
-                {
-                    IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
-
-                    foreach (AppListEntry appListEntry in appListEntries)
-                    {
-                        switch (appListEntry.DisplayInfo.DisplayName)
-                        {
-                            case "Windows Security":
-                                var SecurityMenuItem = new StartMenuItem()
-                                {
-                                    ItemName = appListEntry.DisplayInfo.DisplayName,
-                                    ItemStartURI = package.Id.FullName,
-                                    ItemKind = ApplicationKind.Packaged,
-                                    Icon = new BitmapImage() { UriSource = new Uri(package.Logo.AbsoluteUri.Replace("WindowsSecuritySplashScreen.scale-200.png", "WindowsSecurityAppList.targetsize-256.png").Replace("WindowsSecuritySplashScreen.scale-100.png", "WindowsSecurityAppList.targetsize-256.png")) }
-                                };
-                                allApps.Add(SecurityMenuItem);
-                                break;
-                            case "Windows Backup":
-                                var BackupMenuItem = new StartMenuItem()
-                                {
-                                    ItemName = appListEntry.DisplayInfo.DisplayName,
-                                    ItemStartURI = package.Id.FullName,
-                                    ItemKind = ApplicationKind.Packaged,
-                                    Icon = new BitmapImage() { UriSource = new Uri(@"C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\WindowsBackup\Assets\AppList.targetsize-256.png") }
-                                };
-                                allApps.Add(BackupMenuItem);
-                                break;
-                            case "Get Started":
-                                var GetStartedMenuItem = new StartMenuItem()
-                                {
-                                    ItemName = appListEntry.DisplayInfo.DisplayName,
-                                    ItemStartURI = package.Id.FullName,
-                                    ItemKind = ApplicationKind.Packaged,
-                                    Icon = new BitmapImage() { UriSource = new Uri(@"C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\Assets\GetStartedAppList.targetsize-256.png") }
-                                };
-                                allApps.Add(GetStartedMenuItem);
-                                break;
-                            case "Xbox":
-                                var XboxMenuItem = new StartMenuItem()
-                                {
-                                    ItemName = appListEntry.DisplayInfo.DisplayName,
-                                    ItemStartURI = package.Id.FullName,
-                                    ItemKind = ApplicationKind.LauncherPackaged,
-                                    Icon = new BitmapImage() { UriSource = package.Logo }
-                                };
-                                allApps.Add(XboxMenuItem);
-                                break;
-                            case "Roblox":
-                                var RobloxMenuItem = new StartMenuItem()
-                                {
-                                    ItemName = appListEntry.DisplayInfo.DisplayName,
-                                    ItemStartURI = package.Id.FullName,
-                                    ItemKind = ApplicationKind.XboxGame,
-                                    Icon = new BitmapImage() { UriSource = package.Logo },
-                                    GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
-                                };
-                                allApps.Add(RobloxMenuItem);
-                                break;
-                            default:
-                                var MenuItem = new StartMenuItem()
-                                {
-                                    ItemName = appListEntry.DisplayInfo.DisplayName,
-                                    ItemStartURI = package.Id.FullName,
-                                    ItemKind = ApplicationKind.Packaged,
-                                    Icon = new BitmapImage() { UriSource = package.Logo }
-                                };
-                                allApps.Add(MenuItem);
-                                break;
-
-                        }
-                    }
-                }
-            }
         }
 
         private void AddAppsToStartMenu()
@@ -558,73 +198,6 @@ namespace Windows_Mobile
             }
         }
 
-        private void IndexStartMenuFolder(string userItemsDirectory)
-        {
-            IEnumerable<string> userStartMenuItems = Directory.EnumerateFiles(userItemsDirectory);
-            string[] userStartMenuFolders = Directory.GetDirectories(userItemsDirectory);
-
-            foreach (string folder in userStartMenuFolders)
-            {
-                string[] folderItems = IndexFolder(folder);
-
-                foreach (string item in folderItems)
-                    userStartMenuItems = userStartMenuItems.Append(item);
-            }
-
-            foreach (string item in userStartMenuItems)
-            {
-                if (item.EndsWith(".lnk") || item.EndsWith(".url"))
-                {
-                    var shellFile = ShellFile.FromFilePath(item);
-                    string name = shellFile.Name == "Administrative Tools" ? "Windows Tools" : shellFile.Name;
-                    string targetPath = shellFile.Properties.System.Link.TargetParsingPath.Value;
-                    string arguments = shellFile.Properties.System.Link.Arguments.Value is not null ? shellFile.Properties.System.Link.Arguments.Value : string.Empty;
-
-                    if (!targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
-                    {
-                        BitmapImage bitmapImage = new();
-                        ApplicationKind appKind = targetPath.Contains("Steam.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.Contains("EpicGamesLauncher.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.EndsWith("GalaxyClient.exe", StringComparison.InvariantCultureIgnoreCase) ? ApplicationKind.Launcher : ApplicationKind.Normal;
-                        SteamGridDbGame game = null;
-
-                        int number = targetPath switch
-                        {
-                            "Control Panel" => 21,
-                            "Run..." => 24,
-                            @"C:\Windows\system32\control.exe" => name == "Windows Tools" ? 109 : 0,
-                            _ => 0
-                        };
-                        string path = targetPath switch
-                        {
-                            "File Explorer" => @"C:\Windows\explorer.exe",
-                            "Control Panel" => @"C:\Windows\System32\shell32.dll",
-                            "Run..." => @"C:\Windows\System32\shell32.dll",
-                            @"C:\Windows\system32\control.exe" => name == "Windows Tools" ? @"C:\Windows\System32\imageres.dll" : targetPath,
-                            "Administrative Tools" => @"C:\Windows\System32\imageres.dll",
-                            _ => targetPath
-                        };
-
-                        var icon = App.ExtractIcon(path, number, true);
-                        Bitmap bitmap = icon is not null ? icon.ToBitmap() : Icon.ExtractAssociatedIcon(item).ToBitmap();
-                        using MemoryStream stream = new();
-                        bitmap.Save(stream, ImageFormat.Png);
-                        stream.Position = 0;
-                        bitmapImage.SetSource(stream.AsRandomAccessStream());
-
-                        var MenuItem = new StartMenuItem()
-                        {
-                            ItemName = name,
-                            ItemStartURI = item,
-                            ItemKind = appKind,
-                            Icon = bitmapImage,
-                            GameInfo = game
-                        };
-
-                        allApps.Add(MenuItem);
-                    }
-                }
-            }
-        }
-
         private void StartMenu_Click(object sender, RoutedEventArgs e) => startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
         private void GameView_Click(object sender, RoutedEventArgs e) => taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -648,6 +221,7 @@ namespace Windows_Mobile
         ObservableCollection<StartMenuItem> launcherList = [];
         ObservableCollection<StartMenuItem> appsList = [];
         ObservableCollection<StartMenuItem> allSearch = [];
+        ObservableCollection<MCModInfo> mods = [];
 
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
