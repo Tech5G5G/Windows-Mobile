@@ -39,6 +39,18 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate x:Key="NotificationTemplate" x:DataType="items:Notification">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{x:Bind AppIcon}" Width="40" />
+                        <TextBlock Text="{x:Bind AppDisplayName}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="{x:Bind Title}" />
+                        <TextBlock Text="{x:Bind Body}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
         </Grid.Resources>
         <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Rectangle.Fill>
@@ -111,6 +123,9 @@
             </StackPanel>
         </Grid>
         <Grid x:Name="menuBar" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Margin="8" Height="54" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <Grid.TranslationTransition>
+                <Vector3Transition />
+            </Grid.TranslationTransition>
             <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
             <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
             <Button x:Name="time" Click="Open_Time" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="90">
@@ -130,10 +145,11 @@
                 </StackPanel>
             </Button>
         </Grid>
-        <AutoSuggestBox Height="40" FontSize="15" CornerRadius="20" BorderThickness="0" Margin="4,15" Width="400" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search" QueryIcon="Find" TextChanged="TopAutoSuggestBox_TextChanged">
+        <AutoSuggestBox x:Name="topAutoSuggestBox" Height="40" FontSize="15" CornerRadius="20" BorderThickness="0" Margin="4,15" Width="400" VerticalAlignment="Top" VerticalContentAlignment="Center" PlaceholderText="Search" QueryIcon="Find" TextChanged="TopAutoSuggestBox_TextChanged">
             <AutoSuggestBox.TranslationTransition>
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
         </AutoSuggestBox>
+        <ListView ItemsSource="{x:Bind notifications}" ItemTemplate="{StaticResource NotificationTemplate}" />
     </Grid>
 </Window>

@@ -48,6 +48,16 @@ namespace Windows_Mobile.Indexing
         public string Id { get; set; }
     }
 
+    public class Notification
+    {
+        public string Title { get; set; }
+        public string Body { get; set; }
+
+        public BitmapImage AppIcon { get; set; }
+        public string AppDisplayName { get; set; }
+        public string AppPackageFamilyName { get; set; }
+    }
+
     public static class Extensions
     {
         public static bool IsDuplicate(this StartMenuItem item, ObservableCollection<StartMenuItem> collection)
