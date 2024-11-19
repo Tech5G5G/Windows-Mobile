@@ -28,6 +28,7 @@ namespace Windows_Mobile
         ObservableCollection<StartMenuItem> appsList = [];
         ObservableCollection<StartMenuItem> allSearch = [];
         ObservableCollection<MCModInfo> mods = [];
+        ObservableCollection<Notification> notifications = [];
 
         public MainWindow()
         {
@@ -42,8 +43,33 @@ namespace Windows_Mobile
             allSearch.CollectionChanged += (sender, e) => MenuBar_HeightUpdate();
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
             
-            PopulateStartMenu();
+            //PopulateStartMenu();
             SetControlCenterIcons();
+            GetNotificationsAsync();
+        }
+
+        private async void GetNotificationsAsync()
+        {
+            var listener =  Windows.UI.Notifications.Management.UserNotificationListener.Current;
+            var notifications = await listener.GetNotificationsAsync(Windows.UI.Notifications.NotificationKinds.Toast);
+            listener.NotificationChanged += (sender, e) => GetNotificationsAsync();
+            foreach (var notification in notifications)
+            {
+                Windows.UI.Notifications.NotificationBinding binding = notification.Notification.Visual.GetBinding(Windows.UI.Notifications.KnownNotificationBindings.ToastGeneric);
+                var text = binding.GetTextElements();
+
+                string bodyText = string.Empty;
+                for (int i = 1; i < text.Count; i++)
+                {
+                    var textblock = text[i];
+                    bodyText = bodyText + textblock.Text + "\n";
+                }
+                
+                BitmapImage bmp = new();
+                bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync());
+                var notif = new Notification() { Title = text.First().Text, Body = bodyText, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
+                this.notifications.Add(notif);
+            }
         }
 
         private void SetControlCenterIcons()
@@ -203,8 +229,17 @@ namespace Windows_Mobile
 
         private void Open_Time(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
         private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
-        private void StartMenu_Click(object sender, RoutedEventArgs e) => startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
-        private void GameView_Click(object sender, RoutedEventArgs e) => taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        private void StartMenu_Click(object sender, RoutedEventArgs e)
+        {
+            if ((AppWindow.Size.Height - 70) - startMenu.ActualHeight < 54)
+                Set_MenuBar_Visibility(startMenu.Translation != new Vector3(0, 900, 40));
+            startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
+        }
+        private void GameView_Click(object sender, RoutedEventArgs e)
+        {
+            Set_MenuBar_Visibility(taskViewBackground.Visibility == Visibility.Visible);
+            taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
 
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
@@ -442,5 +477,8 @@ namespace Windows_Mobile
                     AnimationBuilder.Create().Size(axis: Axis.Y, to: newHeight, from: oldHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
             }
         }
+        /// <summary>Shows or hides the menu bar depending on the visibility parameter</summary>
+        /// <param name="Visibility">What to set to set the visibility to. True for visible, false for hidden</param>
+        private void Set_MenuBar_Visibility(bool visibility) => topAutoSuggestBox.Translation = menuBar.Translation = visibility ? Vector3.Zero : new Vector3(0, -64, 0);
     }
 }
