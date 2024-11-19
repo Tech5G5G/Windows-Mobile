@@ -29,6 +29,9 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Diagnostics;
 using CommunityToolkit.WinUI.UI.Animations;
+using Windows.Networking.Connectivity;
+using Windows.Devices.Power;
+using Windows.Services.Maps;
 
 namespace Windows_Mobile
 {
@@ -48,7 +51,111 @@ namespace Windows_Mobile
             PopulateStartMenu();
 
             allSearch.CollectionChanged += (sender, e) => MenuBar_HeightUpdate();
+
+            NetworkProfile = NetworkInformation.GetInternetConnectionProfile();
+            Set_NetworkInfo(NetworkProfile?.GetSignalBars());
+            //Test if this updates when the network level changes, add support for ethernet
+            NetworkInformation.NetworkStatusChanged += (sender) =>
+            {
+                NetworkProfile = NetworkInformation.GetInternetConnectionProfile();
+                Set_NetworkInfo(NetworkProfile?.GetSignalBars());
+            };
+
+            var device = new CoreAudio.MMDeviceEnumerator(Guid.NewGuid()).GetDefaultAudioEndpoint(CoreAudio.DataFlow.Render, CoreAudio.Role.Multimedia);
+            device.AudioEndpointVolume.OnVolumeNotification += (data) => Set_VolumeLevel((int)Math.Ceiling(data.MasterVolume * 100), data.Muted);
+            Set_VolumeLevel((int)Math.Ceiling(device.AudioEndpointVolume.MasterVolumeLevel * 100), device.AudioEndpointVolume.Mute);
+
+            var aggregate = Battery.AggregateBattery;
+            var report = aggregate.GetReport();
+            Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, report.Status == Windows.System.Power.BatteryStatus.Charging);
+            aggregate.ReportUpdated += (sender, e) =>
+            {
+                var report = sender.GetReport();
+                Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, report.Status == Windows.System.Power.BatteryStatus.Charging);
+            };
         }
+
+        private void Set_VolumeLevel(int volumeLevel, bool muted)
+        {
+            this.DispatcherQueue.TryEnqueue(() =>
+            {
+                ToolTipService.SetToolTip(this.volumeLevel, muted ? "Muted" : $"{volumeLevel}% volume");
+            });
+        }
+
+        private void Set_BatteryLevel(int? remainingCapacity, int? totalCapacity, bool charging /*bool batterySaver = false*/)
+        {
+            var percentCharged = (int)(((double)remainingCapacity / (double)totalCapacity) * 100);
+            this.DispatcherQueue.TryEnqueue(() =>
+            {
+                ToolTipService.SetToolTip(batteryLevel, $"{percentCharged}% remaining");
+
+                if (charging)
+                {
+                    batteryLevel.Glyph = percentCharged switch
+                    {
+                        >= 100 => "\uEBB5",
+                        >= 90 => "\uEBB4",
+                        >= 80 => "\uEBB3",
+                        >= 70 => "\uEBB2",
+                        >= 60 => "\uEBB1",
+                        >= 50 => "\uEBB0",
+                        >= 40 => "\uEBAF",
+                        >= 30 => "\uEBAE",
+                        >= 20 => "\uEBAD",
+                        >= 10 => "\uEBAC",
+                        0 => "\uEBAB",
+                        _ => "\uEC02"
+                    };
+                }
+                else
+                {
+                    batteryLevel.Glyph = percentCharged switch
+                    {
+                        >= 100 => "\uEBAA",
+                        >= 90 => "\uEBA9",
+                        >= 80 => "\uEBA8",
+                        >= 70 => "\uEBA7",
+                        >= 60 => "\uEBA6",
+                        >= 50 => "\uEBA5",
+                        >= 40 => "\uEBA4",
+                        >= 30 => "\uEBA3",
+                        >= 20 => "\uEBA2",
+                        >= 10 => "\uEBA1",
+                        0 => "\uEBA0",
+                        _ => "\uEC02"
+                    };
+                }
+            });
+        }
+
+        private void Set_NetworkInfo(byte? level)
+        {
+            this.DispatcherQueue.TryEnqueue(() =>
+            {
+                ToolTipService.SetToolTip(networkIconContainer, NetworkProfile?.ProfileName);
+
+                if (level is null)
+                {
+                    networkBackground.Visibility = Visibility.Collapsed;
+                    networkIconForeground.Visibility = Visibility.Visible;
+                    networkIcon.Glyph = "\uF385";
+                }
+                else
+                {
+                    networkBackground.Visibility = Visibility.Visible;
+                    networkIconForeground.Visibility = Visibility.Collapsed;
+                    networkIcon.Glyph = level switch
+                    {
+                        1 => "\uE872",
+                        2 => "\uE873",
+                        3 => "\uE874",
+                        _ => "\uE701"
+                    };
+                }
+            });
+        }
+        public static ConnectionProfile NetworkProfile { get; set; }
 
         private async void PopulateStartMenu()
         {
