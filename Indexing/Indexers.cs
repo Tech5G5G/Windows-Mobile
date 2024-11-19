@@ -12,7 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Windows_Mobile.Types;
+using Windows_Mobile.Iconography;
 using NexusMods.Paths;
 using Microsoft.UI.Xaml.Media.Imaging;
 using GameFinder.StoreHandlers.GOG;
@@ -409,7 +409,7 @@ namespace Windows_Mobile.Indexing
                             _ => targetPath
                         };
 
-                        var icon = App.ExtractIcon(path, number, true);
+                        var icon = IconExtractor.ExtractIcon(path, number, true);
                         Bitmap bitmap = icon is not null ? icon.ToBitmap() : Icon.ExtractAssociatedIcon(item).ToBitmap();
                         using MemoryStream stream = new();
                         bitmap.Save(stream, ImageFormat.Png);
