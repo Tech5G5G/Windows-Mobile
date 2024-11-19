@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Windows.ApplicationModel.Core;
 using Windows.Management.Deployment;
-using Windows_Mobile.Types;
+using Windows_Mobile.Indexing;
 using craftersmine.SteamGridDBNet;
 
 namespace Windows_Mobile
@@ -38,21 +38,6 @@ namespace Windows_Mobile
             MainWindow = new MainWindow();
             MainWindow.Activate();
         }
-
-        public static Icon ExtractIcon(string file, int number, bool largeIcon)
-        {
-            var outInt = ExtractIconEx(file, number, out IntPtr large, out IntPtr small, 1);
-            try
-            {
-                return Icon.FromHandle(largeIcon ? large : small);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-        private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
 
         public static Window MainWindow { get; set; }
 
