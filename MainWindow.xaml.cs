@@ -22,6 +22,13 @@ namespace Windows_Mobile
 {
     public sealed partial class MainWindow : Window
     {
+        ObservableCollection<StartMenuItem> allApps = [];
+        ObservableCollection<StartMenuItem> gamesList = [];
+        ObservableCollection<StartMenuItem> launcherList = [];
+        ObservableCollection<StartMenuItem> appsList = [];
+        ObservableCollection<StartMenuItem> allSearch = [];
+        ObservableCollection<MCModInfo> mods = [];
+
         public MainWindow()
         {
             this.InitializeComponent();
@@ -36,10 +43,10 @@ namespace Windows_Mobile
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
             
             PopulateStartMenu();
-            Set_ControlCenterIcons();
+            SetControlCenterIcons();
         }
 
-        private void Set_ControlCenterIcons()
+        private void SetControlCenterIcons()
         {
             var profile = NetworkInformation.GetInternetConnectionProfile();
             Set_NetworkInfo(profile.GetNetworkType(), profile?.ProfileName);
@@ -64,7 +71,6 @@ namespace Windows_Mobile
                 Set_BatteryLevel(report.RemainingCapacityInMilliwattHours, report.FullChargeCapacityInMilliwattHours, powerStatus == System.Windows.Forms.PowerLineStatus.Online);
             };
         }
-
         private static MMDevice device;
         private void Set_VolumeLevel(int volumeLevel, bool muted)
         {
@@ -90,7 +96,6 @@ namespace Windows_Mobile
                 }
             });
         }
-
         private void Set_BatteryLevel(int? remainingCapacity, int? totalCapacity, bool charging)
         {
             var percentCharged = (int)(((double)remainingCapacity / (double)totalCapacity) * 100);
@@ -136,7 +141,6 @@ namespace Windows_Mobile
                 }
             });
         }
-
         private void Set_NetworkInfo(NetworkType type, string name)
         {
             this.DispatcherQueue.TryEnqueue(() =>
@@ -165,7 +169,6 @@ namespace Windows_Mobile
             Indexers.IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
             AddAppsToStartMenu();
         }
-
         private void AddAppsToStartMenu()
         {
             var ordered = from item in allApps orderby item.ItemName[..1] select item;
@@ -198,8 +201,11 @@ namespace Windows_Mobile
             }
         }
 
+        private void Open_Time(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
+        private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
         private void StartMenu_Click(object sender, RoutedEventArgs e) => startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
         private void GameView_Click(object sender, RoutedEventArgs e) => taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             if ((NavigationViewItem)args.SelectedItem != mc_NavItem)
@@ -215,19 +221,11 @@ namespace Windows_Mobile
                 apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = mods });
             }
         }
-
-        ObservableCollection<StartMenuItem> allApps = [];
-        ObservableCollection<StartMenuItem> gamesList = [];
-        ObservableCollection<StartMenuItem> launcherList = [];
-        ObservableCollection<StartMenuItem> appsList = [];
-        ObservableCollection<StartMenuItem> allSearch = [];
-        ObservableCollection<MCModInfo> mods = [];
-
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             List<ApplicationKind> applicationTypes = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? [ApplicationKind.SteamGame, ApplicationKind.EpicGamesGame, ApplicationKind.XboxGame] : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? [ApplicationKind.Launcher, ApplicationKind.LauncherPackaged] : [ApplicationKind.Normal, ApplicationKind.Packaged];
             ObservableCollection<StartMenuItem> list = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? gamesList : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? launcherList : appsList;
-            var filteredUnordered = allApps.Where(entry => Filter(entry, sender.Text));
+            var filteredUnordered = allApps.Where(entry => entry.ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase));
             var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
 
             for (int i = list.Count - 1; i >= 0; i--)
@@ -244,12 +242,6 @@ namespace Windows_Mobile
                     list.Add(item);
             }
         }
-
-        private bool Filter(StartMenuItem entry, string filter)
-        {
-            return entry.ItemName.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
-        }
-
         private async void Apps_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is not null)
@@ -307,7 +299,6 @@ namespace Windows_Mobile
                 }
             }
         }
-
         private void StartMenuItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
             var senderPanel = sender as StackPanel;
@@ -380,62 +371,50 @@ namespace Windows_Mobile
             flyout.ShowAt(senderPanel, options);
         }
 
-        private void MenuBar_HeightUpdate()
-        {
-            if (Animated == true) 
-            {
-                var newHeight = ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400));
-                var oldHeight = menuBar.ActualHeight;
-
-                if (newHeight != oldHeight && newHeight != 64)
-                    AnimationBuilder.Create().Size(axis: Axis.Y, to: newHeight, from: oldHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-            }
-        }
-
-        private bool? Animated { get; set; } = null;
-        private Windows.Foundation.Size OriginalSize { get; set; }
+        private bool? menuBarAnimated = null;
+        private Windows.Foundation.Size menuBarOriginalSize;
         private void TopAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            if (Animated == true && string.IsNullOrWhiteSpace(sender.Text))
+            if (menuBarAnimated == true && string.IsNullOrWhiteSpace(sender.Text))
             {
                 launcherGrid.Visibility = controlCenter.Visibility = time.Visibility = Visibility.Visible;
                 allSearchList.Visibility = Visibility.Collapsed;
                 sender.CornerRadius = new CornerRadius(20);
                 sender.Translation = Vector3.Zero;
                 var animationBuilder = AnimationBuilder.Create();
-                animationBuilder.Size(axis: Axis.X, to: OriginalSize.Width, from: 698, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: OriginalSize.Height, from: menuBar.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.X, to: menuBarOriginalSize.Width, from: 698, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: menuBarOriginalSize.Height, from: menuBar.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 AnimationBuilder.Create().Size(axis: Axis.X, to: 400, from: 674, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
-                Animated = false;
+                menuBarAnimated = false;
             }
-            else if (Animated == false && !string.IsNullOrWhiteSpace(sender.Text))
+            else if (menuBarAnimated == false && !string.IsNullOrWhiteSpace(sender.Text))
             {
                 launcherGrid.Visibility = controlCenter.Visibility = time.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);
                 var animationBuilder = AnimationBuilder.Create();
-                animationBuilder.Size(axis: Axis.X, to: 698, from: OriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.X, to: 698, from: origmenuBarOriginalSizeinalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: OriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
-                Animated = true;
+                menuBarAnimated = true;
             }
-            else if (Animated is null)
+            else if (menuBarAnimated is null)
             {
-                OriginalSize = new(menuBar.ActualWidth, menuBar.ActualHeight);
+                menuBarOriginalSize = new(menuBar.ActualWidth, menuBar.ActualHeight);
                 
                 launcherGrid.Visibility = controlCenter.Visibility = time.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);
                 var animationBuilder = AnimationBuilder.Create();
-                animationBuilder.Size(axis: Axis.X, to: 698, from: OriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: OriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
-                Animated = true;
+                menuBarAnimated = true;
             }
 
-            var filteredUnordered = allApps.Where(entry => Filter(entry, sender.Text));
+            var filteredUnordered = allApps.Where(entry => entry.ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase));
             var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
 
             for (int i = allSearch.Count - 1; i >= 0; i--)
@@ -452,15 +431,16 @@ namespace Windows_Mobile
                     allSearch.Add(item);
             }
         }
-
-        private void Open_Time(object sender, RoutedEventArgs args)
+        private void MenuBar_HeightUpdate()
         {
-            Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
-        }
+            if (menuBarAnimated == true)
+            {
+                var newHeight = ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400));
+                var oldHeight = menuBar.ActualHeight;
 
-        private void Open_ControlCenter(object sender, RoutedEventArgs args)
-        {
-            Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
+                if (newHeight != oldHeight && newHeight != 64)
+                    AnimationBuilder.Create().Size(axis: Axis.Y, to: newHeight, from: oldHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+            }
         }
     }
 }
