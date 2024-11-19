@@ -13,8 +13,12 @@
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove=".gitattributes" />
+    <None Remove=".gitignore" />
     <None Remove="Assets\Placeholder.png" />
     <None Remove="Assets\StartMenuIcon.png" />
+    <None Remove="desktop.ini" />
+    <None Remove="README.md" />
   </ItemGroup>
 
   <ItemGroup>
