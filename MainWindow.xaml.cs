@@ -394,8 +394,8 @@ namespace Windows_Mobile
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);
                 var animationBuilder = AnimationBuilder.Create();
-                animationBuilder.Size(axis: Axis.X, to: 698, from: origmenuBarOriginalSizeinalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: OriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
                 menuBarAnimated = true;
             }
@@ -409,7 +409,7 @@ namespace Windows_Mobile
                 sender.Translation = new Vector3(0, 5, 0);
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: OriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
                 menuBarAnimated = true;
             }
