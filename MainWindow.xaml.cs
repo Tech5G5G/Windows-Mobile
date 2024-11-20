@@ -17,6 +17,8 @@ using CoreAudio;
 using Windows_Mobile.Indexing;
 using Windows_Mobile.Networking;
 using Windows_Mobile.MC;
+using Windows.UI.Notifications;
+using Windows.UI.Notifications.Management;
 
 namespace Windows_Mobile
 {
@@ -28,7 +30,7 @@ namespace Windows_Mobile
         ObservableCollection<StartMenuItem> appsList = [];
         ObservableCollection<StartMenuItem> allSearch = [];
         ObservableCollection<MCModInfo> mods = [];
-        ObservableCollection<Notification> notifications = [];
+        ObservableCollection<Indexing.Notification> notifications = [];
 
         public MainWindow()
         {
@@ -43,32 +45,112 @@ namespace Windows_Mobile
             allSearch.CollectionChanged += (sender, e) => MenuBar_HeightUpdate();
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
             
-            //PopulateStartMenu();
+            PopulateStartMenu();
             SetControlCenterIcons();
-            GetNotificationsAsync();
+            SetUpNotificationListener();
+
+            var pros = Process.GetProcesses();
+            bool isApplication = pros.First(i => i.Id == 16308).MainWindowHandle != 0;
         }
 
-        private async void GetNotificationsAsync()
+        private static UserNotificationListener listener;
+        private void SetUpNotificationListener()
         {
-            var listener =  Windows.UI.Notifications.Management.UserNotificationListener.Current;
-            var notifications = await listener.GetNotificationsAsync(Windows.UI.Notifications.NotificationKinds.Toast);
-            listener.NotificationChanged += (sender, e) => GetNotificationsAsync();
-            foreach (var notification in notifications)
+            listener = UserNotificationListener.Current;
+            listener.NotificationChanged += (sender, e) => UpdateNotificationsAsync(sender, e.ChangeKind, e.UserNotificationId);
+            UpdateNotificationsAsync(listener, UserNotificationChangedKind.Added, 0, true);
+        }
+        private async void UpdateNotificationsAsync(UserNotificationListener sender, UserNotificationChangedKind changeKind, uint changedId, bool getAll = false)
+        {
+            if (getAll)
             {
-                Windows.UI.Notifications.NotificationBinding binding = notification.Notification.Visual.GetBinding(Windows.UI.Notifications.KnownNotificationBindings.ToastGeneric);
+                var notifications = await sender.GetNotificationsAsync(NotificationKinds.Toast);
+
+                foreach (var notification in notifications)
+                {
+                    NotificationBinding binding = notification.Notification.Visual.GetBinding(KnownNotificationBindings.ToastGeneric);
+                    var text = binding.GetTextElements();
+
+                    string titleText = text.Count == 0 ? "New notification" : text.First().Text;
+                    string bodyText = string.Empty;
+                    for (int i = 1; i < text.Count; i++)
+                    {
+                        var textblock = text[i];
+                        bodyText = bodyText + textblock.Text + "\n";
+                    }
+
+                    this.DispatcherQueue.TryEnqueue(async () =>
+                    {
+                        BitmapImage bmp = new();
+                        if (!string.IsNullOrWhiteSpace(notification.AppInfo.PackageFamilyName))
+                        {
+                            bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync());
+                            var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
+                            this.notifications.Insert(0, notif);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
+                                bmp = entry.Icon;
+                            }
+                            catch { }
+                            var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName };
+                            this.notifications.Insert(0, notif);
+                        }
+                    });
+                }
+            }
+            else if (changeKind == UserNotificationChangedKind.Added)
+            {
+                var notifications = await sender.GetNotificationsAsync(NotificationKinds.Toast);
+                var notification = notifications.First(i => i.Id == changedId);
+
+                NotificationBinding binding = notification.Notification.Visual.GetBinding(KnownNotificationBindings.ToastGeneric);
                 var text = binding.GetTextElements();
 
+                string titleText = text.Count == 0 ? "New notification" : text.First().Text;
                 string bodyText = string.Empty;
                 for (int i = 1; i < text.Count; i++)
                 {
                     var textblock = text[i];
                     bodyText = bodyText + textblock.Text + "\n";
                 }
-                
-                BitmapImage bmp = new();
-                bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync());
-                var notif = new Notification() { Title = text.First().Text, Body = bodyText, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
-                this.notifications.Add(notif);
+
+                this.DispatcherQueue.TryEnqueue(async () =>
+                {
+                    BitmapImage bmp = new();
+                    if (!string.IsNullOrWhiteSpace(notification.AppInfo.PackageFamilyName))
+                    {
+                        bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync());
+                        var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
+                        this.notifications.Insert(0, notif);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
+                            bmp = entry.Icon;
+                        }
+                        catch { }
+                        var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName };
+                        this.notifications.Insert(0, notif);
+                    }
+                });
+            }
+            else if (changeKind == UserNotificationChangedKind.Removed)
+            {
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    try
+                    {
+                        var notif = notifications.First(i => i.Id == changedId);
+                        notifications.Remove(notif);
+                    }
+                    catch { }
+                });
             }
         }
 
@@ -478,7 +560,16 @@ namespace Windows_Mobile
             }
         }
         /// <summary>Shows or hides the menu bar depending on the visibility parameter</summary>
-        /// <param name="Visibility">What to set to set the visibility to. True for visible, false for hidden</param>
+        /// <param name="visibility">What to set to set the visibility to. True for visible, false for hidden</param>
         private void Set_MenuBar_Visibility(bool visibility) => topAutoSuggestBox.Translation = menuBar.Translation = visibility ? Vector3.Zero : new Vector3(0, -64, 0);
+
+        private void Dismiss_Notification(uint notifId)
+        {
+            notifications.Remove(notifications.First(i => i.Id == notifId));
+            listener.RemoveNotification(notifId);
+        }
+
+        private void SwipeItem_Invoked(SwipeItem sender, SwipeItemInvokedEventArgs args) => Dismiss_Notification((uint)sender.CommandParameter);
+        private void Button_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
     }
 }

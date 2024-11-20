@@ -40,16 +40,26 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate x:Key="NotificationTemplate" x:DataType="items:Notification">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{x:Bind AppIcon}" Width="40" />
-                        <TextBlock Text="{x:Bind AppDisplayName}" />
+                <SwipeControl HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="12,0,10,0" Margin="0,0,0,4" CornerRadius="4" Background="{ThemeResource LayerOnAccentAcrylicFillColorDefault}" BorderBrush="{ThemeResource ControlStrokeColorOnAccentSecondary}" BorderThickness="1">
+                    <SwipeControl.LeftItems>
+                        <SwipeItems Mode="Execute">
+                            <SwipeItem Background="Transparent" CommandParameter="{x:Bind Id}" Invoked="SwipeItem_Invoked" />
+                        </SwipeItems>
+                    </SwipeControl.LeftItems>
+                    <StackPanel Spacing="4" Margin="0, 10, 0, -6">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{x:Bind AppIcon}" Width="20" Margin="0,0,8,0" />
+                                <TextBlock Text="{x:Bind AppDisplayName}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button Width="25" Height="25" Padding="0" Tag="{x:Bind Id}" BorderThickness="0" Background="Transparent" Content="{ui:FontIcon FontSize=14, Glyph=&#xE8BB;}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Button_Click" />
+                        </Grid>
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind Title}" TextWrapping="WrapWholeWords" />
+                            <TextBlock Text="{x:Bind Body}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="WrapWholeWords" />
+                        </StackPanel>
                     </StackPanel>
-                    <StackPanel>
-                        <TextBlock Text="{x:Bind Title}" />
-                        <TextBlock Text="{x:Bind Body}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
-                </StackPanel>
+                </SwipeControl>
             </DataTemplate>
         </Grid.Resources>
         <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -150,6 +160,8 @@
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
         </AutoSuggestBox>
-        <ListView ItemsSource="{x:Bind notifications}" ItemTemplate="{StaticResource NotificationTemplate}" />
+        <Grid Width="500" Height="500" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" Padding="-16,0,-12,0">
+            <ListView SelectionMode="None" Padding="4" ItemsSource="{x:Bind notifications}" ItemTemplate="{StaticResource NotificationTemplate}" />
+        </Grid>
     </Grid>
 </Window>
