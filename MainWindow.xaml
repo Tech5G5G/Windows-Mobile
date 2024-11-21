@@ -160,8 +160,41 @@
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
         </AutoSuggestBox>
-        <Grid Width="500" Height="500" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" Padding="-16,0,-12,0">
-            <ListView SelectionMode="None" Padding="4" ItemsSource="{x:Bind notifications}" ItemTemplate="{StaticResource NotificationTemplate}" />
+        <Grid Margin="0,74,0,80" VerticalAlignment="Stretch" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid x:Name="notificationsPane" Grid.Row="0" VerticalAlignment="Stretch" Translation="0,0,40" CornerRadius="8" Width="334"  Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
+                <Grid.Shadow>
+                    <ThemeShadow />
+                </Grid.Shadow>
+                <Grid VerticalAlignment="Top" Height="48" Margin="15,0,0,0">
+                    <TextBlock VerticalAlignment="Center" Text="Notifications" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8" HorizontalAlignment="Right" Margin="0,0,15,0">
+                        <Button Click="NotifSettingsButton_Click" Height="24" Width="24" Padding="4" Content="{ui:FontIcon FontSize=11, Glyph=&#xE713;}" />
+                        <Button x:Name="clearAllButton" Visibility="Collapsed" Height="24" Width="54" Padding="4">
+                            <TextBlock Text="Clear all" FontSize="11" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="0,48,0,0">
+                    <ListView VerticalAlignment="Stretch" SelectionMode="None" Padding="-12,0,-8,0" ItemsSource="{x:Bind notifications}" ItemTemplate="{StaticResource NotificationTemplate}" />
+                    <TextBlock x:Name="notificationsPlaceholder" Text="No new notifications" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Grid>
+            </Grid>
+            <StackPanel Grid.Row="1" VerticalAlignment="Bottom" CornerRadius="8" Translation="0,0,40" Width="334" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
+                <Grid VerticalAlignment="Top" Height="48" Margin="15,0,0,0">
+                    <TextBlock x:Name="dateDisplay" VerticalAlignment="Center" />
+                    <Button Click="CalendarCollapseButton_Click" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Height="24" Width="24" Padding="4" Content="{ui:FontIcon FontSize=11, Glyph=&#xE70D;}" />
+                </Grid>
+                <Grid x:Name="calendar" Height="377" Background="{ThemeResource LayerOnAccentAcrylicFillColorDefault}" BorderBrush="{ThemeResource ControlStrokeColorOnAccentSecondary}" BorderThickness="0,1,0,0">
+                    <CalendarView BorderBrush="Transparent" Background="Transparent" OutOfScopeForeground="{ThemeResource AccentTextFillColorDisabledBrush}" HorizontalAlignment="Stretch" Height="375" BorderThickness="0" />
+                </Grid>
+                <StackPanel.Shadow>
+                    <ThemeShadow />
+                </StackPanel.Shadow>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>
