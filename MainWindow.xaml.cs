@@ -337,8 +337,8 @@ namespace Windows_Mobile
             }
         }
 
-        private void Open_Time(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
         private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
+        private void Time_Click(object sender, RoutedEventArgs args) => notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero;
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
             if ((AppWindow.Size.Height - 70) - startMenu.ActualHeight < 54)

@@ -138,7 +138,7 @@
             </Grid.TranslationTransition>
             <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
             <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
-            <Button x:Name="time" Click="Open_Time" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="90">
+            <Button x:Name="time" Click="Time_Click" Background="Transparent" BorderThickness="0" HorizontalAlignment="Right" ToolTipService.ToolTip="DateTime" Height="40" Width="90">
                 <StackPanel>
                     <TextBlock Text="12:23 PM" FontSize="11" HorizontalAlignment="Right" />
                     <TextBlock Text="11/15/2024" FontSize="11" HorizontalAlignment="Right" />
@@ -160,12 +160,15 @@
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
         </AutoSuggestBox>
-        <Grid Margin="0,74,0,80" VerticalAlignment="Stretch">
+        <Grid x:Name="notifCenter" Translation="400, 0, 0" Margin="0,74,8,80" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+            <Grid.TranslationTransition>
+                <Vector3Transition />
+            </Grid.TranslationTransition>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid x:Name="notificationsPane" Grid.Row="0" Margin="0,0,0,12" VerticalAlignment="Stretch" Translation="0,0,40" CornerRadius="8" Width="334"  Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
+            <Grid x:Name="notificationsPane" Grid.Row="0" Margin="0,0,0,12" VerticalAlignment="Stretch" Translation="0,0,40" CornerRadius="8" Width="334" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
                 <Grid.Shadow>
                     <ThemeShadow />
                 </Grid.Shadow>
