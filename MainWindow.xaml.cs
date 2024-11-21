@@ -54,12 +54,17 @@ namespace Windows_Mobile
                 var status = notifications.Count == 0;
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
-                notificationsPane.VerticalAlignment = status ? VerticalAlignment.Bottom : VerticalAlignment.Stretch;
+                // notificationsPane.MaxHeight = status ? 230 : double.MaxValue;
 
-                if (status)
-                    AnimationBuilder.Create().Size(axis: Axis.Y, to: 230, from: notificationsPane.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(notificationsPane);
-                else
-                    notificationsPane.Height = double.NaN;
+                // //Add code when all notifs are dismissed and the calendar is collapsed, to align the notifPane to the bottom
+
+                // notificationsPane.VerticalAlignment = status ? VerticalAlignment.Bottom : VerticalAlignment.Stretch;
+
+                // if (status)
+                //     notificationsPane.MaxHeight = 230;
+                //     // AnimationBuilder.Create().Size(axis: Axis.Y, to: 230, from: notificationsPane.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(notificationsPane);
+                // else
+                //     notificationsPane.MaxHeight = double.MaxValue;
             };
 
             dateDisplay.Text = DateTime.Now.ToLongDateString().Replace($", {DateTime.Now.Year}", null);
@@ -77,7 +82,8 @@ namespace Windows_Mobile
         private void SetUpNotificationListener()
         {
             listener = UserNotificationListener.Current;
-            listener.NotificationChanged += (sender, e) => UpdateNotificationsAsync(sender, e.ChangeKind, e.UserNotificationId);
+            try { listener.NotificationChanged += (sender, e) => UpdateNotificationsAsync(sender, e.ChangeKind, e.UserNotificationId); }
+            catch { }
             UpdateNotificationsAsync(listener, UserNotificationChangedKind.Added, 0, true);
         }
         private async void UpdateNotificationsAsync(UserNotificationListener sender, UserNotificationChangedKind changeKind, uint changedId, bool getAll = false)
@@ -596,12 +602,17 @@ namespace Windows_Mobile
         private void Button_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
         private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:privacy-notifications") { UseShellExecute = true });
 
-        private void CalendarCollapseButton_Click(object sender, RoutedEventArgs e)
+        private async void CalendarCollapseButton_Click(object sender, RoutedEventArgs e)
         {
             var senderButton = sender as Button;
 
             if (calendar.Height == 377)
             {
+                // if (notificationsPane.MaxHeight == 230)
+                // {
+                //     notificationsPane.Height = notificationsPane.ActualHeight;
+                //     notificationsPane.VerticalAlignment = VerticalAlignment.Bottom;
+                // }
                 //notificationsPane.Margin = new Thickness(0, 0, 0, 60);
                 AnimationBuilder.Create().Size(axis: Axis.Y, to: 0, from: 377, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(calendar);
                 senderButton.Content = new FontIcon() { Glyph = "\uE70E", FontSize = 11 };
@@ -609,8 +620,13 @@ namespace Windows_Mobile
             else
             {
                 //notificationsPane.Margin = new Thickness(0, 0, 0, 437);
-                AnimationBuilder.Create().Size(axis: Axis.Y, to: 377, from: 0, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(calendar);
                 senderButton.Content = new FontIcon() { Glyph = "\uE70D", FontSize = 11 };
+                await AnimationBuilder.Create().Size(axis: Axis.Y, to: 377, from: 0, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).StartAsync(calendar);
+                // if (notificationsPane.MaxHeight == 230)
+                // {
+                //     notificationsPane.Height = double.NaN;
+                //     notificationsPane.VerticalAlignment = VerticalAlignment.Stretch;
+                // }
             }
         }
     }

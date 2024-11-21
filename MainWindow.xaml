@@ -50,7 +50,7 @@
                         <Grid>
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="{x:Bind AppIcon}" Width="20" Margin="0,0,8,0" />
-                                <TextBlock Text="{x:Bind AppDisplayName}" VerticalAlignment="Center" />
+                                <TextBlock Text="{x:Bind AppDisplayName}" MaxWidth="242" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                             </StackPanel>
                             <Button Width="25" Height="25" Padding="0" Tag="{x:Bind Id}" BorderThickness="0" Background="Transparent" Content="{ui:FontIcon FontSize=14, Glyph=&#xE8BB;}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Button_Click" />
                         </Grid>
@@ -160,12 +160,12 @@
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
         </AutoSuggestBox>
-        <Grid Margin="0,74,0,80" VerticalAlignment="Stretch" RowSpacing="12">
+        <Grid Margin="0,74,0,80" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid x:Name="notificationsPane" Grid.Row="0" VerticalAlignment="Stretch" Translation="0,0,40" CornerRadius="8" Width="334"  Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
+            <Grid x:Name="notificationsPane" Grid.Row="0" Margin="0,0,0,12" VerticalAlignment="Stretch" Translation="0,0,40" CornerRadius="8" Width="334"  Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
                 <Grid.Shadow>
                     <ThemeShadow />
                 </Grid.Shadow>
