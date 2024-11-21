@@ -52,7 +52,7 @@ namespace Windows_Mobile.Indexing
     {
         public string Title { get; set; }
         public string Body { get; set; }
-        public uint Id {  set; get; }
+        public uint Id { set; get; }
 
         public BitmapImage AppIcon { get; set; }
         public string AppDisplayName { get; set; }
