@@ -43,14 +43,34 @@ namespace Windows_Mobile
             startNV.SelectedItem = games_NavItem;
 
             allSearch.CollectionChanged += (sender, e) => MenuBar_HeightUpdate();
+            clearAllButton.Click += (sender, e) =>
+            {
+                var count = notifications.Count - 1;
+                for (int i = 0; i <= count; i++)
+                    Dismiss_Notification(notifications[0].Id);
+            };
+            notifications.CollectionChanged += (sender, e) =>
+            {
+                var status = notifications.Count == 0;
+                notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
+                clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
+                notificationsPane.VerticalAlignment = status ? VerticalAlignment.Bottom : VerticalAlignment.Stretch;
+
+                if (status)
+                    AnimationBuilder.Create().Size(axis: Axis.Y, to: 230, from: notificationsPane.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(notificationsPane);
+                else
+                    notificationsPane.Height = double.NaN;
+            };
+
+            dateDisplay.Text = DateTime.Now.ToLongDateString().Replace($", {DateTime.Now.Year}", null);
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            
+
             PopulateStartMenu();
             SetControlCenterIcons();
             SetUpNotificationListener();
 
-            var pros = Process.GetProcesses();
-            bool isApplication = pros.First(i => i.Id == 16308).MainWindowHandle != 0;
+            //var pros = Process.GetProcesses();
+            //bool isApplication = pros.First(i => i.Id == 16308).MainWindowHandle != 0;
         }
 
         private static UserNotificationListener listener;
@@ -105,7 +125,9 @@ namespace Windows_Mobile
             else if (changeKind == UserNotificationChangedKind.Added)
             {
                 var notifications = await sender.GetNotificationsAsync(NotificationKinds.Toast);
-                var notification = notifications.First(i => i.Id == changedId);
+                UserNotification notification = null;
+                try { notification = notifications.First(i => i.Id == changedId); }
+                catch { }
 
                 NotificationBinding binding = notification.Notification.Visual.GetBinding(KnownNotificationBindings.ToastGeneric);
                 var text = binding.GetTextElements();
@@ -565,11 +587,31 @@ namespace Windows_Mobile
 
         private void Dismiss_Notification(uint notifId)
         {
-            notifications.Remove(notifications.First(i => i.Id == notifId));
+            try { notifications.Remove(notifications.First(i => i.Id == notifId)); }
+            catch { }
             listener.RemoveNotification(notifId);
         }
 
         private void SwipeItem_Invoked(SwipeItem sender, SwipeItemInvokedEventArgs args) => Dismiss_Notification((uint)sender.CommandParameter);
         private void Button_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
+        private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:privacy-notifications") { UseShellExecute = true });
+
+        private void CalendarCollapseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var senderButton = sender as Button;
+
+            if (calendar.Height == 377)
+            {
+                //notificationsPane.Margin = new Thickness(0, 0, 0, 60);
+                AnimationBuilder.Create().Size(axis: Axis.Y, to: 0, from: 377, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(calendar);
+                senderButton.Content = new FontIcon() { Glyph = "\uE70E", FontSize = 11 };
+            }
+            else
+            {
+                //notificationsPane.Margin = new Thickness(0, 0, 0, 437);
+                AnimationBuilder.Create().Size(axis: Axis.Y, to: 377, from: 0, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(calendar);
+                senderButton.Content = new FontIcon() { Glyph = "\uE70D", FontSize = 11 };
+            }
+        }
     }
 }
