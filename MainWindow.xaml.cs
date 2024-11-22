@@ -186,6 +186,15 @@ namespace Windows_Mobile
                 });
             }
         }
+        private void CalendarCollapseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var senderButton = sender as Button;
+            AnimationBuilder.Create().Size(axis: Axis.Y, to: calendar.Height == 377 ? 0 : 377, from: calendar.Height == 377 ? 377 : 0, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(calendar);
+            senderButton.Content = new FontIcon() { Glyph = calendar.Height == 377 ? "\uE70E" : "\uE70D", FontSize = 11 };
+        }
+        private void SwipeItem_Invoked(SwipeItem sender, SwipeItemInvokedEventArgs args) => Dismiss_Notification((uint)sender.CommandParameter);
+        private void Notif_DismissButton_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
+        private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:notifications") { UseShellExecute = true });
 
         private void SetControlCenterIcons()
         {
@@ -592,47 +601,6 @@ namespace Windows_Mobile
                     AnimationBuilder.Create().Size(axis: Axis.Y, to: newHeight, from: oldHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
             }
         }
-        /// <summary>Shows or hides the menu bar depending on the visibility parameter</summary>
-        /// <param name="visibility">What to set to set the visibility to. True for visible, false for hidden</param>
         private void Set_MenuBar_Visibility(bool visibility) => topAutoSuggestBox.Translation = menuBar.Translation = visibility ? Vector3.Zero : new Vector3(0, -64, 0);
-
-        private void Dismiss_Notification(uint notifId)
-        {
-            try { notifications.Remove(notifications.First(i => i.Id == notifId)); }
-            catch { }
-            listener.RemoveNotification(notifId);
-        }
-
-        private void SwipeItem_Invoked(SwipeItem sender, SwipeItemInvokedEventArgs args) => Dismiss_Notification((uint)sender.CommandParameter);
-        private void Button_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
-        private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:privacy-notifications") { UseShellExecute = true });
-
-        private async void CalendarCollapseButton_Click(object sender, RoutedEventArgs e)
-        {
-            var senderButton = sender as Button;
-
-            if (calendar.Height == 377)
-            {
-                // if (notificationsPane.MaxHeight == 230)
-                // {
-                //     notificationsPane.Height = notificationsPane.ActualHeight;
-                //     notificationsPane.VerticalAlignment = VerticalAlignment.Bottom;
-                // }
-                //notificationsPane.Margin = new Thickness(0, 0, 0, 60);
-                AnimationBuilder.Create().Size(axis: Axis.Y, to: 0, from: 377, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(calendar);
-                senderButton.Content = new FontIcon() { Glyph = "\uE70E", FontSize = 11 };
-            }
-            else
-            {
-                //notificationsPane.Margin = new Thickness(0, 0, 0, 437);
-                senderButton.Content = new FontIcon() { Glyph = "\uE70D", FontSize = 11 };
-                await AnimationBuilder.Create().Size(axis: Axis.Y, to: 377, from: 0, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).StartAsync(calendar);
-                // if (notificationsPane.MaxHeight == 230)
-                // {
-                //     notificationsPane.Height = double.NaN;
-                //     notificationsPane.VerticalAlignment = VerticalAlignment.Stretch;
-                // }
-            }
-        }
     }
 }
