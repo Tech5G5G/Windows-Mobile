@@ -52,7 +52,7 @@
                                 <Image Source="{x:Bind AppIcon}" Width="20" Margin="0,0,8,0" />
                                 <TextBlock Text="{x:Bind AppDisplayName}" MaxWidth="242" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                             </StackPanel>
-                            <Button Width="25" Height="25" Padding="0" Tag="{x:Bind Id}" BorderThickness="0" Background="Transparent" Content="{ui:FontIcon FontSize=14, Glyph=&#xE8BB;}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Button_Click" />
+                            <Button Width="25" Height="25" Padding="0" Tag="{x:Bind Id}" BorderThickness="0" Background="Transparent" Content="{ui:FontIcon FontSize=14, Glyph=&#xE8BB;}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Notif_DismissButton_Click" />
                         </Grid>
                         <StackPanel>
                             <TextBlock Text="{x:Bind Title}" TextWrapping="WrapWholeWords" />
