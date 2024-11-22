@@ -54,17 +54,6 @@ namespace Windows_Mobile
                 var status = notifications.Count == 0;
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
-                // notificationsPane.MaxHeight = status ? 230 : double.MaxValue;
-
-                // //Add code when all notifs are dismissed and the calendar is collapsed, to align the notifPane to the bottom
-
-                // notificationsPane.VerticalAlignment = status ? VerticalAlignment.Bottom : VerticalAlignment.Stretch;
-
-                // if (status)
-                //     notificationsPane.MaxHeight = 230;
-                //     // AnimationBuilder.Create().Size(axis: Axis.Y, to: 230, from: notificationsPane.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(notificationsPane);
-                // else
-                //     notificationsPane.MaxHeight = double.MaxValue;
             };
 
             dateDisplay.Text = DateTime.Now.ToLongDateString().Replace($", {DateTime.Now.Year}", null);
