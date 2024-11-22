@@ -55,16 +55,31 @@ namespace Windows_Mobile
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
             };
-
-            dateDisplay.Text = DateTime.Now.ToLongDateString().Replace($", {DateTime.Now.Year}", null);
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
 
             PopulateStartMenu();
             SetControlCenterIcons();
+            UpdateTime(true);
             SetUpNotificationListener();
+        }
 
-            //var pros = Process.GetProcesses();
-            //bool isApplication = pros.First(i => i.Id == 16308).MainWindowHandle != 0;
+        private void UpdateTime(bool setupTimer = false)
+        {
+            if (setupTimer)
+            {
+                System.Timers.Timer timer = new() { Interval = 1000 };
+                timer.Elapsed += (s, e) => this.DispatcherQueue?.TryEnqueue(() => UpdateTime());
+                timer.Start();
+            }
+
+            try
+            {
+                var dateTime = DateTime.Now;
+                timeDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:HH:mm:ss tt}", dateTime) });
+                date.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:MM/dd/yyyy}", dateTime) });
+                dateDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = $"{dateTime.DayOfWeek}, {dateTime.Month.ToMonthName()} {dateTime.Day}" });
+            }
+            catch { }
         }
 
         private static UserNotificationListener listener;
