@@ -71,11 +71,17 @@ namespace Windows_Mobile
         private void SetUpNotificationListener()
         {
             listener = UserNotificationListener.Current;
-            try { listener.NotificationChanged += (sender, e) => UpdateNotificationsAsync(sender, e.ChangeKind, e.UserNotificationId); }
+            try { listener.NotificationChanged += (sender, e) => UpdateNotifications(sender, e.ChangeKind, e.UserNotificationId); }
             catch { }
-            UpdateNotificationsAsync(listener, UserNotificationChangedKind.Added, 0, true);
+            UpdateNotifications(listener, UserNotificationChangedKind.Added, 0, true);
         }
-        private async void UpdateNotificationsAsync(UserNotificationListener sender, UserNotificationChangedKind changeKind, uint changedId, bool getAll = false)
+        private void Dismiss_Notification(uint notifId)
+        {
+            try { notifications.Remove(notifications.First(i => i.Id == notifId)); }
+            catch { }
+            listener.RemoveNotification(notifId);
+        }
+        private async void UpdateNotifications(UserNotificationListener sender, UserNotificationChangedKind changeKind, uint changedId, bool getAll = false)
         {
             if (getAll)
             {
