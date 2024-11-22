@@ -125,6 +125,7 @@
                         <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
                         <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
                     </NavigationView.Resources>
+                    <!--Make it so that going to Minecraft section, content switches to navigation view (MC Launcher)-->
                     <ListView x:Name="apps" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" Padding="0,0,0,3" ItemTemplate="{StaticResource StartMenuItemTemplate}" VerticalAlignment="Stretch" />
                 </NavigationView>
             </Grid>
