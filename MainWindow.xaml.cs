@@ -105,7 +105,12 @@ namespace Windows_Mobile
                         BitmapImage bmp = new();
                         if (!string.IsNullOrWhiteSpace(notification.AppInfo.PackageFamilyName))
                         {
-                            bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync());
+                            try
+                            {
+                                var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
+                                bmp = entry.Icon;
+                            }
+                            catch { bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync()); }
                             var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
                             this.notifications.Insert(0, notif);
                         }
@@ -146,7 +151,12 @@ namespace Windows_Mobile
                     BitmapImage bmp = new();
                     if (!string.IsNullOrWhiteSpace(notification.AppInfo.PackageFamilyName))
                     {
-                        bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync());
+                        try
+                        {
+                            var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
+                            bmp = entry.Icon;
+                        }
+                        catch { bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync()); }
                         var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
                         this.notifications.Insert(0, notif);
                     }
