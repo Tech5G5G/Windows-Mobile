@@ -2,10 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using Windows.ApplicationModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Windows.ApplicationModel.Core;
 using Windows.Management.Deployment;
 using Windows_Mobile.Indexing;
