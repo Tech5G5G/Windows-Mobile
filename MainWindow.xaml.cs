@@ -295,7 +295,7 @@ namespace Windows_Mobile
         {
             this.DispatcherQueue.TryEnqueue(() =>
             {
-                ToolTipService.SetToolTip(networkIcon, name);
+                ToolTipService.SetToolTip(networkIcon, type == NetworkType.None ? "No internet access" : name);
                 networkIcon.Glyph = type switch
                 {
                     NetworkType.WiFi => "\uE701",
