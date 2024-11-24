@@ -212,6 +212,15 @@
                         <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="{ThemeResource TextFillColorSecondary}" />
                         <SolidColorBrush x:Key="ToggleButtonForegroundCheckedDisabled" Color="{ThemeResource TextFillColorDisabled}" />
                     </ToggleButton.Resources>
+                    <ToggleButton.ContextFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xEC92;}" Text="Adjust time and date" Click="DateTimeButton_Click" />
+                            <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE713;}" Text="Notifications settings" Click="NotifSettingsButton_Click" />
+                            <MenuFlyoutSeparator />
+                            <RadioMenuFlyoutItem x:Name="global_RadioButton" Icon="{ui:FontIcon Glyph=&#xE91C;}" Text="Global" Tag="True" Click="NotifRadioContext_Click" />
+                            <RadioMenuFlyoutItem x:Name="builtin_RadioButton" IsChecked="True" Icon="{ui:FontIcon Glyph=&#xEC7A;}" Text="Built-in" Tag="False" Click="NotifRadioContext_Click" />
+                        </MenuFlyout>
+                    </ToggleButton.ContextFlyout>
                 </ToggleButton>
             </StackPanel>
         </Grid>
