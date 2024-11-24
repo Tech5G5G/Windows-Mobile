@@ -55,7 +55,15 @@ namespace Windows_Mobile
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
             };
+            App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
+            {
+                notifCenter.Translation = new Vector3(400, 0, 0);
+                time.IsChecked = false;
+            };
+
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
+            if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
+            else builtin_RadioButton.IsChecked = true;
 
             PopulateStartMenu();
             SetControlCenterIcons();
@@ -80,6 +88,16 @@ namespace Windows_Mobile
                 dateDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = $"{dateTime.DayOfWeek}, {dateTime.Month.ToMonthName()} {dateTime.Day}" });
             }
             catch { }
+        }
+        private void Time_Click(object sender, RoutedEventArgs args)
+        {
+            if (App.Settings.IsGlobalNotifCenterEnabled) 
+            {
+                (sender as ToggleButton).IsChecked = false;
+                Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
+            }
+            else
+                notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero; 
         }
 
         private static UserNotificationListener listener;
@@ -210,6 +228,8 @@ namespace Windows_Mobile
         private void SwipeItem_Invoked(SwipeItem sender, SwipeItemInvokedEventArgs args) => Dismiss_Notification((uint)sender.CommandParameter);
         private void Notif_DismissButton_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
         private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:notifications") { UseShellExecute = true });
+        private void DateTimeButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:dateandtime") { UseShellExecute = true });
+        private void NotifRadioContext_Click(object sender, RoutedEventArgs e) => App.Settings.IsGlobalNotifCenterEnabled = bool.Parse((string)(sender as Control).Tag);
 
         private void SetControlCenterIcons()
         {
@@ -367,17 +387,23 @@ namespace Windows_Mobile
         }
 
         private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
-        private void Time_Click(object sender, RoutedEventArgs args) => notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero;
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
-            if ((AppWindow.Size.Height - 70) - startMenu.ActualHeight < 54)
+            if (AppWindow.Size.Height - 70 - startMenu.ActualHeight < 54)
                 Set_MenuBar_Visibility(startMenu.Translation != new Vector3(0, 900, 40));
             startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
         }
         private void GameView_Click(object sender, RoutedEventArgs e)
         {
-            Set_MenuBar_Visibility(taskViewBackground.Visibility == Visibility.Visible);
             taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+
+            Set_MenuBar_Visibility(taskViewBackground.Visibility == Visibility.Collapsed);
+
+            notifCenter.Translation = new Vector3(400, 0, 0);
+            time.IsChecked = false;
+
+            startMenu.Translation = new Vector3(0, 900, 40);
+            startMenuButton.IsChecked = false;
         }
 
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -429,8 +455,8 @@ namespace Windows_Mobile
                     var content = new Grid() { Margin = new Thickness(-24) };
                     var heros = await App.db.GetHeroesByGameIdAsync(selectedItemInfo.GameInfo.Id);
                     var logos = await App.db.GetLogosForGameAsync(selectedItemInfo.GameInfo);
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
-                    content.Children.Add(new Microsoft.UI.Xaml.Controls.Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
+                    content.Children.Add(new Image() { Source = new BitmapImage() { UriSource = new Uri(heros.Length != 0 ? heros[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
+                    content.Children.Add(new Image() { MaxHeight = 90, Margin = new Thickness(40), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Stretch, Source = new BitmapImage() { UriSource = new Uri(logos.Length != 0 ? logos[0].FullImageUrl : "ms-appx:///Assets/Placeholder.png") } });
                     var dialog = new ContentDialog() { XamlRoot = this.Content.XamlRoot, Content = content, PrimaryButtonText = "Play", CloseButtonText = "Cancel", DefaultButton = ContentDialogButton.Primary };
 
                     if (selectedItemInfo.ItemKind == ApplicationKind.SteamGame)
@@ -549,7 +575,7 @@ namespace Windows_Mobile
 
             flyout.Items.Add(uninstallButton);
 
-            FlyoutShowOptions options = new() { Position = e.GetPosition(senderPanel), Placement = FlyoutPlacementMode.RightEdgeAlignedTop };
+            FlyoutShowOptions options = new() { Position = point, Placement = FlyoutPlacementMode.RightEdgeAlignedTop };
 
             flyout.ShowAt(senderPanel, options);
         }
