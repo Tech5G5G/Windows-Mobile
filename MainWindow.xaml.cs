@@ -473,9 +473,18 @@ namespace Windows_Mobile
                 }
             }
         }
+        private void StartMenuItem_Holding(object sender, HoldingRoutedEventArgs e)
+        {
+            if (e.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Touch && e.HoldingState == Microsoft.UI.Input.HoldingState.Started)
+                StartMenuItem_RightTapped(sender as StackPanel, e.GetPosition(sender as UIElement));
+        }
         private void StartMenuItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
-            var senderPanel = sender as StackPanel;
+            if (e.PointerDeviceType != Microsoft.UI.Input.PointerDeviceType.Touch)
+                StartMenuItem_RightTapped(sender as StackPanel, e.GetPosition(sender as UIElement));
+        }
+        private void StartMenuItem_RightTapped(StackPanel senderPanel, Windows.Foundation.Point point)
+        {
             var appType = (senderPanel.Tag as StartMenuItem).ItemKind;
             var flyout = new MenuFlyout();
 
