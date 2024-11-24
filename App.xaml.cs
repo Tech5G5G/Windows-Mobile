@@ -8,6 +8,7 @@ using Windows.ApplicationModel.Core;
 using Windows.Management.Deployment;
 using Windows_Mobile.Indexing;
 using craftersmine.SteamGridDBNet;
+using Windows.Storage;
 
 namespace Windows_Mobile
 {
@@ -56,6 +57,33 @@ namespace Windows_Mobile
                 IReadOnlyList<AppListEntry> appListEntries = package.GetAppListEntries();
                 await appListEntries.First(i => i.DisplayInfo.DisplayName == selectedItemInfo.ItemName).LaunchAsync();
             }
+        }
+
+        public static class Settings
+        {
+            private static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            public delegate void SettingChangedEventHandler(SettingChangedEventArgs args);
+            public class SettingChangedEventArgs(object newValue) { public object NewValue { get; } = newValue; };
+
+            public static bool IsGlobalNotifCenterEnabled
+            {
+                get
+                {
+                    if (localSettings.Values.TryGetValue("IsGlobalNotifCenterEnabled", out object value))
+                        return (bool)value;
+                    else
+                    {
+                        localSettings.Values["IsGlobalNotifCenterEnabled"] = false;
+                        return false;
+                    }
+                }
+                set
+                {
+                    localSettings.Values["IsGlobalNotifCenterEnabled"] = value;
+                    IsGlobalNotifCenterEnabledChanged?.Invoke(new SettingChangedEventArgs(value));
+                }
+            }
+            public static event SettingChangedEventHandler IsGlobalNotifCenterEnabledChanged;
         }
     }
 }
