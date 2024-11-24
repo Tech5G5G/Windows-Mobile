@@ -83,6 +83,7 @@ namespace Windows_Mobile
             try
             {
                 var dateTime = DateTime.Now;
+                timeToolTip.Text = $"{dateTime.ToLongDateString()}\n\n{string.Format("{0:HH:mm:ss tt}", dateTime)}";
                 timeDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:HH:mm:ss tt}", dateTime) });
                 date.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:MM/dd/yyyy}", dateTime) });
                 dateDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = $"{dateTime.DayOfWeek}, {dateTime.Month.ToMonthName()} {dateTime.Day}" });
