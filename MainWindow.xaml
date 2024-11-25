@@ -133,7 +133,7 @@
                 <Vector3Transition />
             </Grid.TranslationTransition>
         </Grid>
-        <Grid x:Name="gameViewBackground" Visibility="Collapsed" Opacity="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid x:Name="gameView" Visibility="Collapsed" Margin="0,0,0,70" Opacity="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.Background>
                 <AcrylicBrush TintColor="#F3F3F3" TintOpacity="0.0" FallbackColor="Transparent" />
             </Grid.Background>
@@ -149,6 +149,42 @@
                     <animations:ScalarKeyFrame Key="1" Value="1" />
                 </animations:OpacityAnimation>
             </animations:Implicit.ShowAnimations>
+
+            <ScrollViewer>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="300" />
+                        <ColumnDefinition Width="250" />
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="500" />
+                    </Grid.RowDefinitions>
+
+                    <Border Background="Red" Width="300">
+                        <TextBlock Text="Game art and open button" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="2" Width="300" Background="Blue">
+                        <TextBlock Text="Game news" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="3" Width="300" Background="Green">
+                        <TextBlock Text="Game news" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="4" Width="300" Background="Orange" HorizontalAlignment="Right">
+                        <TextBlock Text="Game news" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="5" Width="300" Background="Violet" HorizontalAlignment="Right">
+                        <TextBlock Text="Game news" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Grid.Column="6" Width="300" Background="Yellow" HorizontalAlignment="Right">
+                        <TextBlock Text="Game news" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </Grid>
+            </ScrollViewer>
         </Grid>
         <Grid Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Height="70" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -159,7 +195,7 @@
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{ThemeResource ControlFillColorTertiary}" />
                     </ToggleButton.Resources>
                 </ToggleButton>
-                <ToggleButton ElementSoundMode="FocusOnly" Click="GameView_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Game view" Height="60" Width="60" Content="{ui:FontIcon FontSize=38, Glyph=&#xE7C4;}">
+                <ToggleButton ElementSoundMode="FocusOnly" Click="GameView_Open" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Game view" Height="60" Width="60" Content="{ui:FontIcon FontSize=38, Glyph=&#xE7C4;}">
                     <ToggleButton.Resources>
                         <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{ThemeResource ControlFillColorDefault}" />
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{ThemeResource ControlFillColorSecondary}" />
