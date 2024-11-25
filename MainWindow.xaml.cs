@@ -82,7 +82,7 @@ namespace Windows_Mobile
                 bool leftXenabled = true;
                 DateTime? leftXenabledChanged = null;
 
-                bool aEnabled = false;
+                bool aEnabled = true;
                 bool bEnabled = true;
                 bool downEnabled = true;
                 bool leftEnabled = true;
@@ -158,83 +158,77 @@ namespace Windows_Mobile
                         leftXenabledChanged = DateTime.Now;
                     }
 
-                    this.DispatcherQueue.TryEnqueue(() => test.Text = "blocking");
                     if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A) && aEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA });
                         aEnabled = false;
-
-                        this.DispatcherQueue.TryEnqueue(() => test.Text = "inputedddddddddd");
                     }
                     else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A))
-                    {
-                        this.DispatcherQueue.TryEnqueue(() => test.Text = "reset");
                         aEnabled = true;
+
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && bEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadB });
+                        bEnabled = false;
                     }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B))
+                        bEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && bEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadB });
-                    //     bEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B))
-                    //     bEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadDown });
+                        downEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown))
+                        downEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadDown });
-                    //     downEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown))
-                    //     downEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadLeft });
+                        leftEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft))
+                        leftEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadLeft });
-                    //     leftEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft))
-                    //     leftEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadRight });
+                        rightEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight))
+                        rightEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadRight });
-                    //     rightEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight))
-                    //     rightEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadUp });
+                        upEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp))
+                        upEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadUp });
-                    //     upEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp))
-                    //     upEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu) && menuEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadMenu });
+                        menuEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu))
+                        menuEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu) && menuEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadMenu });
-                    //     menuEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu))
-                    //     menuEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.X) && xEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadX });
+                        xEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.X))
+                        xEnabled = true;
 
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.X) && xEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadX });
-                    //     xEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.X))
-                    //     xEnabled = true;
-
-                    // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Y) && yEnabled)
-                    // {
-                    //     inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadY });
-                    //     yEnabled = false;
-                    // }
-                    // else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Y))
-                    //     yEnabled = true;
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Y) && yEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadY });
+                        yEnabled = false;
+                    }
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Y))
+                        yEnabled = true;
 
                     if (inputList.Count > 0)
                         injector?.InjectKeyboardInput(inputList);
