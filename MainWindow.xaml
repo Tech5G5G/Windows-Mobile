@@ -95,7 +95,7 @@
             </Grid>
             <StackPanel Grid.Row="1" VerticalAlignment="Bottom" CornerRadius="8" Translation="0,0,40" Width="334" Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}">
                 <Grid VerticalAlignment="Top" Height="48" Margin="15,0,0,0">
-                    <TextBlock x:Name="dateDisplay" VerticalAlignment="Center" />
+                    <TextBlock x:Name="longDate" VerticalAlignment="Center" />
                     <Button Click="CalendarCollapseButton_Click" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Height="24" Width="24" Padding="4" Content="{ui:FontIcon FontSize=11, Glyph=&#xE70D;}" />
                 </Grid>
                 <Grid x:Name="calendar" Height="377" Background="{ThemeResource LayerOnAccentAcrylicFillColorDefault}" BorderBrush="{ThemeResource ControlStrokeColorOnAccentSecondary}" BorderThickness="0,1,0,0">
@@ -133,7 +133,7 @@
                 <Vector3Transition />
             </Grid.TranslationTransition>
         </Grid>
-        <Grid x:Name="taskViewBackground" Visibility="Collapsed" Opacity="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid x:Name="gameViewBackground" Visibility="Collapsed" Opacity="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.Background>
                 <AcrylicBrush TintColor="#F3F3F3" TintOpacity="0.0" FallbackColor="Transparent" />
             </Grid.Background>
@@ -152,14 +152,14 @@
         </Grid>
         <Grid Background="{ThemeResource AcrylicInAppFillColorBaseBrush}" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowRevealBorderBrush}" Height="70" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
             <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ToggleButton x:Name="startMenuButton" Click="StartMenu_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Start" Height="60" Width="60" Content="{ui:BitmapIcon Source=Assets/StartMenuIcon.png}">
+                <ToggleButton x:Name="startMenuButton" ElementSoundMode="FocusOnly" Click="StartMenu_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Start" Height="60" Width="60" Content="{ui:BitmapIcon Source=Assets/StartMenuIcon.png}">
                     <ToggleButton.Resources>
                         <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{ThemeResource ControlFillColorDefault}" />
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{ThemeResource ControlFillColorSecondary}" />
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="{ThemeResource ControlFillColorTertiary}" />
                     </ToggleButton.Resources>
                 </ToggleButton>
-                <ToggleButton Click="GameView_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Game view" Height="60" Width="60" Content="{ui:FontIcon FontSize=38, Glyph=&#xE7C4;}">
+                <ToggleButton ElementSoundMode="FocusOnly" Click="GameView_Click" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Game view" Height="60" Width="60" Content="{ui:FontIcon FontSize=38, Glyph=&#xE7C4;}">
                     <ToggleButton.Resources>
                         <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="{ThemeResource ControlFillColorDefault}" />
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="{ThemeResource ControlFillColorSecondary}" />
@@ -179,7 +179,8 @@
             <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
             <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="4">
-                <Button x:Name="controlCenter" Click="Open_ControlCenter" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
+                <ToggleSwitch OnContent="Sounds on" OffContent="Sounds off" Toggled="SoundSwitch_Toggled" />
+                <Button x:Name="controlCenterButton" Click="Open_ControlCenter" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon x:Name="networkIcon" Glyph="&#xE701;" FontSize="16" />
                         <Grid x:Name="volumeLevelContainer">
@@ -189,12 +190,12 @@
                         <FontIcon x:Name="batteryLevel" FontSize="16" />
                     </StackPanel>
                 </Button>
-                <ToggleButton x:Name="time" Click="Time_Click" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
+                <ToggleButton x:Name="notifCenterButton" ElementSoundMode="FocusOnly" Click="NotifCenter_Open" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
                     <ToolTipService.ToolTip>
                         <TextBlock x:Name="timeToolTip" />
                     </ToolTipService.ToolTip>
                     <StackPanel>
-                        <TextBlock x:Name="timeDisplay" FontSize="11" HorizontalAlignment="Right" />
+                        <TextBlock x:Name="time" FontSize="11" HorizontalAlignment="Right" />
                         <TextBlock x:Name="date" FontSize="11" HorizontalAlignment="Right" />
                     </StackPanel>
                     <ToggleButton.Resources>
