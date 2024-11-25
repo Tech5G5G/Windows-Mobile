@@ -60,7 +60,7 @@ namespace Windows_Mobile
             App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
             {
                 notifCenter.Translation = new Vector3(400, 0, 0);
-                time.IsChecked = false;
+                notifCenterButton.IsChecked = false;
             };
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
@@ -124,18 +124,17 @@ namespace Windows_Mobile
                 timer.Elapsed += (s, e) => this.DispatcherQueue?.TryEnqueue(() => UpdateTime());
                 timer.Start();
             }
-
             try
             {
                 var dateTime = DateTime.Now;
-                timeToolTip.Text = $"{dateTime.ToLongDateString()}\n\n{string.Format("{0:HH:mm:ss tt}", dateTime)}";
-                timeDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:HH:mm:ss tt}", dateTime) });
+                time.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:HH:mm:ss tt}", dateTime) });
+                timeToolTip.SetBinding(TextBlock.TextProperty, new Binding() { Source = $"{dateTime.ToLongDateString()}\n\n{string.Format("{0:HH:mm:ss tt}", dateTime)}" });
                 date.SetBinding(TextBlock.TextProperty, new Binding() { Source = string.Format("{0:MM/dd/yyyy}", dateTime) });
-                dateDisplay.SetBinding(TextBlock.TextProperty, new Binding() { Source = $"{dateTime.DayOfWeek}, {dateTime.Month.ToMonthName()} {dateTime.Day}" });
+                longDate.SetBinding(TextBlock.TextProperty, new Binding() { Source = $"{dateTime.DayOfWeek}, {dateTime.Month.ToMonthName()} {dateTime.Day}" });
             }
             catch { }
         }
-        private void Time_Click(object sender, RoutedEventArgs args)
+        private void NotifCenter_Open(object sender, RoutedEventArgs args)
         {
             if (App.Settings.IsGlobalNotifCenterEnabled) 
             {
@@ -145,9 +144,9 @@ namespace Windows_Mobile
             }
             else
             {
-                notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero; 
+                notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero;
                 ElementSoundPlayer.Play(notifCenter.Translation == Vector3.Zero ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
-        }
+            }
         }
 
         private static UserNotificationListener listener;
@@ -449,10 +448,10 @@ namespace Windows_Mobile
             ElementSoundPlayer.Play(gameViewBackground.Visibility == Visibility.Visible ? ElementSoundKind.Hide : ElementSoundKind.Show);
             gameViewBackground.Visibility = gameViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
-            Set_MenuBar_Visibility(taskViewBackground.Visibility == Visibility.Collapsed);
+            Set_MenuBar_Visibility(gameViewBackground.Visibility == Visibility.Collapsed);
 
             notifCenter.Translation = new Vector3(400, 0, 0);
-            time.IsChecked = false;
+            notifCenterButton.IsChecked = false;
 
             startMenu.Translation = new Vector3(0, 900, 40);
             startMenuButton.IsChecked = false;
@@ -638,7 +637,7 @@ namespace Windows_Mobile
         {
             if (menuBarAnimated == true && string.IsNullOrWhiteSpace(sender.Text))
             {
-                launcherGrid.Visibility = controlCenter.Visibility = time.Visibility = Visibility.Visible;
+                launcherGrid.Visibility = controlCenterButton.Visibility = notifCenterButton.Visibility = Visibility.Visible;
                 allSearchList.Visibility = Visibility.Collapsed;
                 sender.CornerRadius = new CornerRadius(20);
                 sender.Translation = Vector3.Zero;
@@ -650,7 +649,7 @@ namespace Windows_Mobile
             }
             else if (menuBarAnimated == false && !string.IsNullOrWhiteSpace(sender.Text))
             {
-                launcherGrid.Visibility = controlCenter.Visibility = time.Visibility = Visibility.Collapsed;
+                launcherGrid.Visibility = controlCenterButton.Visibility = notifCenterButton.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);
@@ -664,7 +663,7 @@ namespace Windows_Mobile
             {
                 menuBarOriginalSize = new(menuBar.ActualWidth, menuBar.ActualHeight);
                 
-                launcherGrid.Visibility = controlCenter.Visibility = time.Visibility = Visibility.Collapsed;
+                launcherGrid.Visibility = controlCenterButton.Visibility = notifCenterButton.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);
