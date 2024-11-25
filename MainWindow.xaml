@@ -283,5 +283,6 @@
                 <Vector3Transition />
             </AutoSuggestBox.TranslationTransition>
         </AutoSuggestBox>
+        <TextBlock x:Name="test" Height="20" Width="250" />
     </Grid>
 </Window>
