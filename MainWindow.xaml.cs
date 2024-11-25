@@ -76,37 +76,75 @@ namespace Windows_Mobile
             Windows.Gaming.Input.Gamepad.GamepadAdded += (sender, gamepad) =>
             {
                 bool leftYenabled = true;
-                ulong? leftYenabledChanged = null;
+                DateTime? leftYenabledChanged = null;
+
+                bool leftXenabled = true;
+                DateTime? leftXenabledChanged = null;
 
                 var timer = new System.Timers.Timer() { Interval = 1 };
                 timer.Elapsed += (sender, e) =>
                 {
                     var inputList = new List<InjectedInputKeyboardInfo>();
                     var reading = gamepad.GetCurrentReading();
-                    
+
                     if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5)
                     {
                         leftYenabledChanged = null;
                         leftYenabled = true;
+
+                        if (reading.LeftThumbstickX < 0.5 && reading.LeftThumbstickX > -0.5)
+                            timer.Interval = 1;
                     }
-                    else if (leftYenabledChanged is not null && reading.Timestamp - leftYenabledChanged > 300000)
+                    else if (leftYenabledChanged is not null && DateTime.Now - leftYenabledChanged.Value > TimeSpan.FromMilliseconds(500))
                     {
                         if (!(reading.LeftThumbstickY < 0.5))
                             inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
                         else if (!(reading.LeftThumbstickY > -0.5))
                             inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
+
+                        timer.Interval = 100;
                     }
                     else if (!(reading.LeftThumbstickY < 0.5) && leftYenabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
                         leftYenabled = false;
-                        leftYenabledChanged = reading.Timestamp;
+                        leftYenabledChanged = DateTime.Now;
                     }
                     else if (!(reading.LeftThumbstickY > -0.5) && leftYenabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
                         leftYenabled = false;
-                        leftYenabledChanged = reading.Timestamp;
+                        leftYenabledChanged = DateTime.Now;
+                    }
+
+                    if (reading.LeftThumbstickX < 0.5 && reading.LeftThumbstickX > -0.5)
+                    {
+                        leftXenabledChanged = null;
+                        leftXenabled = true;
+
+                        if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5)
+                            timer.Interval = 1;
+                    }
+                    else if (leftXenabledChanged is not null && DateTime.Now - leftXenabledChanged.Value > TimeSpan.FromMilliseconds(500))
+                    {
+                        if (!(reading.LeftThumbstickX < 0.5))
+                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickRight });
+                        else if (!(reading.LeftThumbstickX > -0.5))
+                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickLeft });
+
+                        timer.Interval = 100;
+                    }
+                    else if (!(reading.LeftThumbstickX < 0.5) && leftXenabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickRight });
+                        leftXenabled = false;
+                        leftXenabledChanged = DateTime.Now;
+                    }
+                    else if (!(reading.LeftThumbstickX > -0.5) && leftXenabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickLeft });
+                        leftXenabled = false;
+                        leftXenabledChanged = DateTime.Now;
                     }
 
                     if (inputList.Count > 0)
@@ -393,11 +431,11 @@ namespace Windows_Mobile
 
         private async void PopulateStartMenu()
         {
-            await Indexers.IndexSteamGames(allApps);
-            await Indexers.IndexEGSGames(allApps);
+            //await Indexers.IndexSteamGames(allApps);
+            //await Indexers.IndexEGSGames(allApps);
             //await Indexers.IndexEAGames(allApps);
-            await Indexers.IndexGOGGames(allApps);
-            await Indexers.IndexPackagedApps(allApps);
+            //await Indexers.IndexGOGGames(allApps);
+            //await Indexers.IndexPackagedApps(allApps);
             Indexers.IndexMCMods(mods);
             Indexers.IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
             Indexers.IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
@@ -443,12 +481,12 @@ namespace Windows_Mobile
             startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
             ElementSoundPlayer.Play(startMenu.Translation != new Vector3(0, 900, 40) ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
         }
-        private void GameView_Click(object sender, RoutedEventArgs e)
+        private void GameView_Open(object sender, RoutedEventArgs e)
         {
-            ElementSoundPlayer.Play(gameViewBackground.Visibility == Visibility.Visible ? ElementSoundKind.Hide : ElementSoundKind.Show);
-            gameViewBackground.Visibility = gameViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            ElementSoundPlayer.Play(gameView.Visibility == Visibility.Visible ? ElementSoundKind.Hide : ElementSoundKind.Show);
+            gameView.Visibility = gameView.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
-            Set_MenuBar_Visibility(gameViewBackground.Visibility == Visibility.Collapsed);
+            Set_MenuBar_Visibility(gameView.Visibility == Visibility.Collapsed);
 
             notifCenter.Translation = new Vector3(400, 0, 0);
             notifCenterButton.IsChecked = false;
