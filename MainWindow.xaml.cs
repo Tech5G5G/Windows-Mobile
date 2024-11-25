@@ -71,6 +71,49 @@ namespace Windows_Mobile
             SetControlCenterIcons();
             UpdateTime(true);
             SetUpNotificationListener();
+
+            var injector = InputInjector.TryCreate();
+            Windows.Gaming.Input.Gamepad.GamepadAdded += (sender, gamepad) =>
+            {
+                bool leftYenabled = true;
+                ulong? leftYenabledChanged = null;
+
+                var timer = new System.Timers.Timer() { Interval = 1 };
+                timer.Elapsed += (sender, e) =>
+                {
+                    var inputList = new List<InjectedInputKeyboardInfo>();
+                    var reading = gamepad.GetCurrentReading();
+                    
+                    if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5)
+                    {
+                        leftYenabledChanged = null;
+                        leftYenabled = true;
+                    }
+                    else if (leftYenabledChanged is not null && reading.Timestamp - leftYenabledChanged > 300000)
+                    {
+                        if (!(reading.LeftThumbstickY < 0.5))
+                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
+                        else if (!(reading.LeftThumbstickY > -0.5))
+                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
+                    }
+                    else if (!(reading.LeftThumbstickY < 0.5) && leftYenabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
+                        leftYenabled = false;
+                        leftYenabledChanged = reading.Timestamp;
+                    }
+                    else if (!(reading.LeftThumbstickY > -0.5) && leftYenabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
+                        leftYenabled = false;
+                        leftYenabledChanged = reading.Timestamp;
+                    }
+
+                    if (inputList.Count > 0)
+                        injector?.InjectKeyboardInput(inputList);
+                };
+                timer.Start();
+            };
         }
 
         private void UpdateTime(bool setupTimer = false)
