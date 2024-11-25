@@ -82,7 +82,7 @@ namespace Windows_Mobile
                 bool leftXenabled = true;
                 DateTime? leftXenabledChanged = null;
 
-                bool aEnabled = true;
+                bool aEnabled = false;
                 bool bEnabled = true;
                 bool downEnabled = true;
                 bool leftEnabled = true;
@@ -162,11 +162,14 @@ namespace Windows_Mobile
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA });
                         aEnabled = false;
+
+                        this.DispatcherQueue.TryEnqueue(() => test.Text = "inputed");
                     }
                     else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A))
+                    {
+                        this.DispatcherQueue.TryEnqueue(() => test.Text = "reset");
                         aEnabled = true;
-
-                    this.DispatcherQueue.TryEnqueue(() => test.Text = aEnabled.ToString());
+                    }
 
                     // if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && bEnabled)
                     // {
