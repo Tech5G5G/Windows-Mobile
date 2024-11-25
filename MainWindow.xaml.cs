@@ -141,9 +141,13 @@ namespace Windows_Mobile
             {
                 (sender as ToggleButton).IsChecked = false;
                 Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
+                ElementSoundPlayer.Play(ElementSoundKind.Invoke);
             }
             else
+            {
                 notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero; 
+                ElementSoundPlayer.Play(notifCenter.Translation == Vector3.Zero ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
+        }
         }
 
         private static UserNotificationListener listener;
@@ -438,10 +442,12 @@ namespace Windows_Mobile
             if (AppWindow.Size.Height - 70 - startMenu.ActualHeight < 54)
                 Set_MenuBar_Visibility(startMenu.Translation != new Vector3(0, 900, 40));
             startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
+            ElementSoundPlayer.Play(startMenu.Translation != new Vector3(0, 900, 40) ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
         }
         private void GameView_Click(object sender, RoutedEventArgs e)
         {
-            taskViewBackground.Visibility = taskViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            ElementSoundPlayer.Play(gameViewBackground.Visibility == Visibility.Visible ? ElementSoundKind.Hide : ElementSoundKind.Show);
+            gameViewBackground.Visibility = gameViewBackground.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
             Set_MenuBar_Visibility(taskViewBackground.Visibility == Visibility.Collapsed);
 
@@ -698,5 +704,7 @@ namespace Windows_Mobile
             }
         }
         private void Set_MenuBar_Visibility(bool visibility) => topAutoSuggestBox.Translation = menuBar.Translation = visibility ? Vector3.Zero : new Vector3(0, -64, 0);
+
+        private void SoundSwitch_Toggled(object sender, RoutedEventArgs e) => ElementSoundPlayer.State = (sender as ToggleSwitch).IsOn ? ElementSoundPlayerState.On : ElementSoundPlayerState.Off;
     }
 }
