@@ -158,12 +158,13 @@ namespace Windows_Mobile
                         leftXenabledChanged = DateTime.Now;
                     }
 
+                    this.DispatcherQueue.TryEnqueue(() => test.Text = "blocking");
                     if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A) && aEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA });
                         aEnabled = false;
 
-                        this.DispatcherQueue.TryEnqueue(() => test.Text = "inputed");
+                        this.DispatcherQueue.TryEnqueue(() => test.Text = "inputedddddddddd");
                     }
                     else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A))
                     {
