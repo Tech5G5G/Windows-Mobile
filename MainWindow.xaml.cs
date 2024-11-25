@@ -637,7 +637,7 @@ namespace Windows_Mobile
         {
             if (menuBarAnimated == true && string.IsNullOrWhiteSpace(sender.Text))
             {
-                launcherGrid.Visibility = controlCenterButton.Visibility = notifCenterButton.Visibility = Visibility.Visible;
+                launcherGrid.Visibility = menuBarTray.Visibility = Visibility.Visible;
                 allSearchList.Visibility = Visibility.Collapsed;
                 sender.CornerRadius = new CornerRadius(20);
                 sender.Translation = Vector3.Zero;
@@ -649,7 +649,7 @@ namespace Windows_Mobile
             }
             else if (menuBarAnimated == false && !string.IsNullOrWhiteSpace(sender.Text))
             {
-                launcherGrid.Visibility = controlCenterButton.Visibility = notifCenterButton.Visibility = Visibility.Collapsed;
+                launcherGrid.Visibility = menuBarTray.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);
@@ -663,7 +663,7 @@ namespace Windows_Mobile
             {
                 menuBarOriginalSize = new(menuBar.ActualWidth, menuBar.ActualHeight);
                 
-                launcherGrid.Visibility = controlCenterButton.Visibility = notifCenterButton.Visibility = Visibility.Collapsed;
+                launcherGrid.Visibility = menuBarTray.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
                 sender.Translation = new Vector3(0, 5, 0);

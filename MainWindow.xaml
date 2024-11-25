@@ -178,7 +178,7 @@
             </Grid.TranslationTransition>
             <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
             <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="4">
+            <StackPanel x:Name="menuBarTray" Orientation="Horizontal" HorizontalAlignment="Right" Margin="4">
                 <ToggleSwitch OnContent="Sounds on" OffContent="Sounds off" Toggled="SoundSwitch_Toggled" />
                 <Button x:Name="controlCenterButton" Click="Open_ControlCenter" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
                     <StackPanel Orientation="Horizontal" Spacing="8">
