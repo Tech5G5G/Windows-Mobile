@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using System.Diagnostics;
-using CommunityToolkit.WinUI.UI.Animations;
+using CommunityToolkit.WinUI.Animations;
 using Windows.Networking.Connectivity;
 using Windows.Devices.Power;
 using CoreAudio;
