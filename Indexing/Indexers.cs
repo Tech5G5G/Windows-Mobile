@@ -34,7 +34,7 @@ namespace Windows_Mobile.Indexing
                 var jars = Directory.GetFiles(@$"C:\Users\{Environment.UserName}\AppData\Roaming\.minecraft\mods");
                 foreach (string jar in jars)
                 {
-                    if (!jar.EndsWith(".jar", StringComparison.InvariantCultureIgnoreCase))
+                    if (!jar.EndsWith(".jar", StringComparison.InvariantCultureIgnoreCase) && !jar.EndsWith(".disabled", StringComparison.InvariantCultureIgnoreCase))
                         continue;
 
                     using var zf = new ZipFile(new FileStream(jar, FileMode.Open, FileAccess.Read));
