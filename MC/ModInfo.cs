@@ -8,7 +8,8 @@ namespace Windows_Mobile.MC
     {
         FabricQuilt,
         Forge,
-        NeoForge
+        NeoForge,
+        Unknown
     }
 
     public class MCModInfo

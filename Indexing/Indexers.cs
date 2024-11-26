@@ -79,6 +79,11 @@ namespace Windows_Mobile.Indexing
                                 modInfo.image = zf.GetInputStream(zf.GetEntry(modInfo.icon)).ToBitmapImage();
                                 mods.Add(modInfo);
                             }
+                            else
+                            {
+                                var fileInfo = new FileInfo(jar);
+                                mods.Add(new MCModInfo() { name = fileInfo.Name.Replace(fileInfo.Extension, null), kind = ModKind.Unknown });
+                            }
                         }
                     }
                 }
