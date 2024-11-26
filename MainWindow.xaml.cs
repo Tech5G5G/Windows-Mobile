@@ -780,7 +780,7 @@ namespace Windows_Mobile
                 AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
                 menuBarAnimated = true;
             }
-            else if (menuBarAnimated is null)
+            else if (menuBarAnimated is null && !string.IsNullOrWhiteSpace(sender.Text))
             {
                 menuBarOriginalSize = new(menuBar.ActualWidth, menuBar.ActualHeight);
                 
