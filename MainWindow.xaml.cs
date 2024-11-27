@@ -72,6 +72,30 @@ namespace Windows_Mobile
             UpdateTime(true);
             SetUpNotificationListener();
             SetUpControllers();
+
+            var inputPane = Windows.UI.ViewManagement.InputPaneInterop.GetForWindow(WinRT.Interop.WindowNative.GetWindowHandle(this));
+            inputPane.Showing += (sender, e) =>
+            {
+                if (e.OccludedRect.Height > 0)
+                {
+                    if ((AppWindow.Size.Height / this.Content.XamlRoot.RasterizationScale) - (10 + e.OccludedRect.Height) - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) < 54)
+                        topAutoSuggestBox.Visibility = menuBar.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+
+                    startMenu.Margin = new Thickness(0, 10, 0, 10 + e.OccludedRect.Height);
+                    startMenu.Height = (this.AppWindow.Size.Height / this.Content.XamlRoot.RasterizationScale) - e.OccludedRect.Height - 20;
+                    startMenu.MinHeight = 0;
+                }
+            };
+
+            inputPane.Hiding += (sender, e) =>
+            {
+                if ((AppWindow.Size.Height / this.Content.XamlRoot.RasterizationScale) - 80 - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) > 54)
+                    topAutoSuggestBox.Visibility = menuBar.Visibility = Visibility.Visible;
+
+                startMenu.Margin = new Thickness(0, 10, 0, 80);
+                startMenu.Height = (AppWindow.Size.Height * 7) / 8;
+                startMenu.MinHeight = 400;
+            };
         }
 
         private void SetUpControllers()
@@ -644,7 +668,7 @@ namespace Windows_Mobile
         private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
-            if (AppWindow.Size.Height - 70 - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) < 54)
+            if ((AppWindow.Size.Height / this.Content.XamlRoot.RasterizationScale) - 80 - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) < 54)
                 topAutoSuggestBox.Visibility = menuBar.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
             startMenu.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
             ElementSoundPlayer.Play(startMenu.Visibility == Visibility.Visible ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
