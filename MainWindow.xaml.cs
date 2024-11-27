@@ -57,15 +57,15 @@ namespace Windows_Mobile
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
             };
-            //App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
-            //{
-            //    notifCenter.Translation = new Vector3(400, 0, 0);
-            //    notifCenterButton.IsChecked = false;
-            //};
+            App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
+            {
+                notifCenter.Translation = new Vector3(400, 0, 0);
+                notifCenterButton.IsChecked = false;
+            };
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            // if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
-            // else builtin_RadioButton.IsChecked = true;
+            if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
+            else builtin_RadioButton.IsChecked = true;
 
             PopulateStartMenu();
             SetControlCenterIcons();
@@ -513,11 +513,11 @@ namespace Windows_Mobile
 
         private async void PopulateStartMenu()
         {
-            //await Indexers.IndexSteamGames(allApps);
-            //await Indexers.IndexEGSGames(allApps);
+            await Indexers.IndexSteamGames(allApps);
+            await Indexers.IndexEGSGames(allApps);
             //await Indexers.IndexEAGames(allApps);
-            //await Indexers.IndexGOGGames(allApps);
-            //await Indexers.IndexPackagedApps(allApps);
+            await Indexers.IndexGOGGames(allApps);
+            await Indexers.IndexPackagedApps(allApps);
             Indexers.IndexMCMods(mods);
             Indexers.IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
             Indexers.IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
