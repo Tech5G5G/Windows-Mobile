@@ -72,7 +72,11 @@ namespace Windows_Mobile
             UpdateTime(true);
             SetUpNotificationListener();
             SetUpControllers();
+            SetUpInputPane();
+        }
 
+        private void SetUpInputPane()
+        {
             var inputPane = Windows.UI.ViewManagement.InputPaneInterop.GetForWindow(WinRT.Interop.WindowNative.GetWindowHandle(this));
             inputPane.Showing += (sender, e) =>
             {
