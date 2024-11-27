@@ -662,6 +662,11 @@ namespace Windows_Mobile
             startMenu.Visibility = Visibility.Collapsed;
             startMenuButton.IsChecked = false;
         }
+        private void Open_Diagnostics(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:troubleshoot") { UseShellExecute = true });
+        private void Open_NetworkInternet(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:network-status") { UseShellExecute = true });
+        private void Open_VolumeMixer(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:apps-volume") { UseShellExecute = true });
+        private void Open_SoundSettings(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:sound") { UseShellExecute = true });
+        private void Open_PowerSleep(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:powersleep") { UseShellExecute = true });
 
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {

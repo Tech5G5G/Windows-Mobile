@@ -227,12 +227,11 @@
                 <Button x:Name="controlCenterButton" Click="Open_ControlCenter" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon x:Name="networkIcon" Glyph="&#xE701;" FontSize="16">
-                            <!--Finish adding context menus-->
                             <FontIcon.ContextFlyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="Diagnose network problems" />
+                                    <MenuFlyoutItem Text="Diagnose network problems" Click="Open_Diagnostics" />
                                     <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE701;}" Text="Network and internet settings" />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE701;}" Click="Open_NetworkInternet" Text="Network and internet settings" />
                                 </MenuFlyout>
                             </FontIcon.ContextFlyout>
                         </FontIcon>
@@ -241,17 +240,17 @@
                             <FontIcon x:Name="volumeLevel" Glyph="&#xE767;" FontSize="16" />
                             <Grid.ContextFlyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="Troubleshoot sound problems" />
+                                    <MenuFlyoutItem Text="Troubleshoot sound problems" Click="Open_Diagnostics" />
                                     <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xF4C3;}" Text="Open volume mixer" />
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE767;}" Text="Sound settings" />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xF4C3;}" Click="Open_VolumeMixer" Text="Open volume mixer" />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE767;}" Click="Open_SoundSettings" Text="Sound settings" />
                                 </MenuFlyout>
                             </Grid.ContextFlyout>
                         </Grid>
                         <FontIcon x:Name="batteryLevel" FontSize="16">
                             <FontIcon.ContextFlyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE7E8;}" Text="Power and sleep settings" />
+                                    <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE7E8;}" Click="Open_PowerSleep" Text="Power and sleep settings" />
                                 </MenuFlyout>
                             </FontIcon.ContextFlyout>
                         </FontIcon>
