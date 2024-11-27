@@ -21,7 +21,6 @@ using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
 using Windows.UI.Input.Preview.Injection;
 using Windows.System;
-using ICSharpCode.SharpZipLib.Zip;
 
 namespace Windows_Mobile
 {
