@@ -71,7 +71,11 @@ namespace Windows_Mobile
             SetControlCenterIcons();
             UpdateTime(true);
             SetUpNotificationListener();
+            SetUpControllers();
+        }
 
+        private void SetUpControllers()
+        {
             var injector = InputInjector.TryCreate();
             Windows.Gaming.Input.Gamepad.GamepadAdded += (sender, gamepad) =>
             {
@@ -81,15 +85,27 @@ namespace Windows_Mobile
                 bool leftXenabled = true;
                 DateTime? leftXenabledChanged = null;
 
+                bool downEnabled = true;
+                DateTime? downEnabledChanged = null;
+
+                bool leftEnabled = true;
+                DateTime? leftEnabledChanged = null;
+
+                bool rightEnabled = true;
+                DateTime? rightEnabledChanged = null;
+
+                bool upEnabled = true;
+                DateTime? upEnabledChanged = null;
+
+                bool rightTriggerEnabled = true;
+                DateTime? rightTriggerEnabledChanged = null;
+
+                bool leftTriggerEnabled = true;
+                DateTime? leftTriggerEnabledChanged = null;
+
                 bool aEnabled = true;
                 bool bEnabled = true;
-                bool downEnabled = true;
-                bool leftEnabled = true;
-                bool rightEnabled = true;
-                bool upEnabled = true;
                 bool menuEnabled = true;
-                bool xEnabled = true;
-                bool yEnabled = true;
 
                 var timer = new System.Timers.Timer() { Interval = 1 };
                 timer.Elapsed += (sender, e) =>
@@ -97,19 +113,18 @@ namespace Windows_Mobile
                     var inputList = new List<InjectedInputKeyboardInfo>();
                     var reading = gamepad.GetCurrentReading();
 
-                    if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5)
+                    if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5 && !leftYenabled)
                     {
                         leftYenabledChanged = null;
                         leftYenabled = true;
 
-                        if (reading.LeftThumbstickX < 0.5 && reading.LeftThumbstickX > -0.5)
-                            timer.Interval = 1;
+                        timer.Interval = 1;
                     }
                     else if (leftYenabledChanged is not null && DateTime.Now - leftYenabledChanged.Value > TimeSpan.FromMilliseconds(500))
                     {
-                        if (!(reading.LeftThumbstickY < 0.5))
+                        if (reading.LeftThumbstickY > 0.5)
                             inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
-                        else if (!(reading.LeftThumbstickY > -0.5))
+                        else if (reading.LeftThumbstickY < -0.5)
                             inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
 
                         timer.Interval = 100;
@@ -127,13 +142,12 @@ namespace Windows_Mobile
                         leftYenabledChanged = DateTime.Now;
                     }
 
-                    if (reading.LeftThumbstickX < 0.5 && reading.LeftThumbstickX > -0.5)
+                    if (reading.LeftThumbstickX < 0.5 && reading.LeftThumbstickX > -0.5 && !leftXenabled)
                     {
                         leftXenabledChanged = null;
                         leftXenabled = true;
 
-                        if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5)
-                            timer.Interval = 1;
+                        timer.Interval = 1;
                     }
                     else if (leftXenabledChanged is not null && DateTime.Now - leftXenabledChanged.Value > TimeSpan.FromMilliseconds(500))
                     {
@@ -162,72 +176,144 @@ namespace Windows_Mobile
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA });
                         aEnabled = false;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A))
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A) && !aEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA, KeyOptions = InjectedInputKeyOptions.KeyUp });
                         aEnabled = true;
+                    }
 
                     if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && bEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadB });
                         bEnabled = false;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B))
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && !bEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadB, KeyOptions = InjectedInputKeyOptions.KeyUp });
                         bEnabled = true;
+                    }
 
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabled)
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabledChanged is not null && DateTime.Now - downEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadDown });
+                        timer.Interval = 100;
+                    }
+                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadDown });
                         downEnabled = false;
+                        downEnabledChanged = DateTime.Now;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown))
-                        downEnabled = true;
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && !downEnabled)
+                    {
+                        timer.Interval = 1;
 
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabled)
+                        downEnabledChanged = null;
+                        downEnabled = true;
+                    }
+
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabledChanged is not null && DateTime.Now - leftEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadLeft });
+                        timer.Interval = 100;
+                    }
+                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadLeft });
                         leftEnabled = false;
+                        leftEnabledChanged = DateTime.Now;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft))
-                        leftEnabled = true;
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && !leftEnabled)
+                    {
+                        timer.Interval = 1;
 
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabled)
+                        leftEnabledChanged = null;
+                        leftEnabled = true;
+                    }
+
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabledChanged is not null && DateTime.Now - rightEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadRight });
+                        timer.Interval = 100;
+                    }
+                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadRight });
                         rightEnabled = false;
+                        rightEnabledChanged = DateTime.Now;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight))
-                        rightEnabled = true;
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && !rightEnabled)
+                    {
+                        timer.Interval = 1;
 
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabled)
+                        rightEnabledChanged = null;
+                        rightEnabled = true;
+                    }
+
+                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabledChanged is not null && DateTime.Now - upEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadUp });
+                        timer.Interval = 100;
+                    }
+                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabled)
                     {
                         inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadUp });
                         upEnabled = false;
+                        upEnabledChanged = DateTime.Now;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp))
+                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && !upEnabled)
+                    {
+                        timer.Interval = 1;
+
+                        upEnabledChanged = null;
                         upEnabled = true;
+                    }
 
                     if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu) && menuEnabled)
                     {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadMenu });
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.Application });
                         menuEnabled = false;
                     }
                     else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu))
                         menuEnabled = true;
 
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.X) && xEnabled)
+                    if (reading.LeftTrigger > 0.5 && leftTriggerEnabledChanged is not null && DateTime.Now - leftTriggerEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
                     {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadX });
-                        xEnabled = false;
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftTrigger });
+                        timer.Interval = 100;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.X))
-                        xEnabled = true;
+                    else if (reading.LeftTrigger > 0.5 && leftTriggerEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftTrigger });
+                        leftTriggerEnabled = false;
+                        leftTriggerEnabledChanged = DateTime.Now;
+                    }
+                    else if (reading.LeftTrigger < 0.5 && !leftTriggerEnabled)
+                    {
+                        timer.Interval = 1;
 
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Y) && yEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadY });
-                        yEnabled = false;
+                        leftTriggerEnabledChanged = null;
+                        leftTriggerEnabled = true;
                     }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Y))
-                        yEnabled = true;
+
+                    if (reading.RightTrigger > 0.5 && rightTriggerEnabledChanged is not null && DateTime.Now - rightTriggerEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadRightTrigger });
+                        timer.Interval = 100;
+                    }
+                    else if (reading.RightTrigger > 0.5 && rightTriggerEnabled)
+                    {
+                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadRightTrigger });
+                        rightTriggerEnabled = false;
+                        rightTriggerEnabledChanged = DateTime.Now;
+                    }
+                    else if (reading.RightTrigger < 0.5 && !rightTriggerEnabled)
+                    {
+                        timer.Interval = 1;
+
+                        rightTriggerEnabledChanged = null;
+                        rightTriggerEnabled = true;
+                    }
 
                     if (inputList.Count > 0)
                         injector?.InjectKeyboardInput(inputList);
@@ -673,14 +759,19 @@ namespace Windows_Mobile
         private void StartMenuItem_Holding(object sender, HoldingRoutedEventArgs e)
         {
             if (e.PointerDeviceType == Microsoft.UI.Input.PointerDeviceType.Touch && e.HoldingState == Microsoft.UI.Input.HoldingState.Started)
-                StartMenuItem_RightTapped(sender as StackPanel, e.GetPosition(sender as UIElement));
+                StartMenuItem_ContextRequested(sender as StackPanel, e.GetPosition(sender as UIElement));
         }
         private void StartMenuItem_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
             if (e.PointerDeviceType != Microsoft.UI.Input.PointerDeviceType.Touch)
-                StartMenuItem_RightTapped(sender as StackPanel, e.GetPosition(sender as UIElement));
+                StartMenuItem_ContextRequested(sender as StackPanel, e.GetPosition(sender as UIElement));
         }
-        private void StartMenuItem_RightTapped(StackPanel senderPanel, Windows.Foundation.Point point)
+        private void StartMenuItem_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == VirtualKey.Application)
+                StartMenuItem_ContextRequested((e.OriginalSource as ListViewItem).ContentTemplateRoot as StackPanel, null);
+        }
+        private void StartMenuItem_ContextRequested(StackPanel senderPanel, Windows.Foundation.Point? point)
         {
             var appType = (senderPanel.Tag as StartMenuItem).ItemKind;
             var flyout = new MenuFlyout();
@@ -746,9 +837,7 @@ namespace Windows_Mobile
 
             flyout.Items.Add(uninstallButton);
 
-            FlyoutShowOptions options = new() { Position = point, Placement = FlyoutPlacementMode.RightEdgeAlignedTop };
-
-            flyout.ShowAt(senderPanel, options);
+            flyout.ShowAt(senderPanel, showOptions: new() { Position = point, Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft });
         }
 
         private bool? menuBarAnimated = null;

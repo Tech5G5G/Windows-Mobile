@@ -126,7 +126,7 @@
                         <SolidColorBrush x:Key="NavigationViewContentGridBorderBrush" Color="Transparent" />
                     </NavigationView.Resources>
                     <!--Make it so that going to Minecraft section, content switches to navigation view (MC Launcher)-->
-                    <ListView x:Name="apps" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" Padding="0,0,0,3" ItemTemplate="{StaticResource StartMenuItemTemplate}" VerticalAlignment="Stretch" />
+                    <ListView x:Name="apps" ElementSoundMode="FocusOnly" KeyDown="StartMenuItem_KeyDown" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" Padding="0,0,0,3" ItemTemplate="{StaticResource StartMenuItemTemplate}" VerticalAlignment="Stretch" />
                 </NavigationView>
             </Grid>
             <Grid.TranslationTransition>
@@ -213,7 +213,7 @@
                 <Vector3Transition />
             </Grid.TranslationTransition>
             <GridView x:Name="launcherGrid" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" SelectionMode="None" HorizontalAlignment="Left" Margin="4" VerticalAlignment="Center" ItemsSource="{x:Bind launcherList}" ItemTemplate="{StaticResource LauncherTemplate}" />
-            <ListView x:Name="allSearchList" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
+            <ListView x:Name="allSearchList" KeyDown="StartMenuItem_KeyDown" IsItemClickEnabled="True" SelectionMode="None" ItemClick="Apps_ItemClick" Margin="0,62,0,0" ItemsSource="{x:Bind allSearch}" ItemTemplate="{StaticResource StartMenuItemTemplate}" />
             <StackPanel x:Name="menuBarTray" Orientation="Horizontal" HorizontalAlignment="Right" Margin="4">
                 <ToggleSwitch OnContent="Sounds on" OffContent="Sounds off" Toggled="SoundSwitch_Toggled" />
                 <Button x:Name="controlCenterButton" Click="Open_ControlCenter" Background="Transparent" BorderThickness="0" VerticalAlignment="Stretch">
