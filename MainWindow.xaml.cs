@@ -644,7 +644,7 @@ namespace Windows_Mobile
         private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
-            if (AppWindow.Size.Height - 70 - startMenu.ActualHeight < 54)
+            if (AppWindow.Size.Height - 70 - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) < 54)
                 Set_MenuBar_Visibility(startMenu.Visibility == Visibility.Visible);
             startMenu.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
             ElementSoundPlayer.Play(startMenu.Visibility == Visibility.Visible ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
