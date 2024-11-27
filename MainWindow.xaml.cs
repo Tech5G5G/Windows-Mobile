@@ -59,7 +59,7 @@ namespace Windows_Mobile
             };
             App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
             {
-                notifCenter.Translation = new Vector3(400, 0, 0);
+                notifCenter.Visibility = Visibility.Collapsed;
                 notifCenterButton.IsChecked = false;
             };
 
@@ -350,8 +350,8 @@ namespace Windows_Mobile
             }
             else
             {
-                notifCenter.Translation = notifCenter.Translation == Vector3.Zero ? new Vector3(400, 0, 0) : Vector3.Zero;
-                ElementSoundPlayer.Play(notifCenter.Translation == Vector3.Zero ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
+                notifCenter.Visibility = notifCenter.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+                ElementSoundPlayer.Play(notifCenter.Visibility == Visibility.Visible ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
             }
         }
 
@@ -645,9 +645,9 @@ namespace Windows_Mobile
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
             if (AppWindow.Size.Height - 70 - startMenu.ActualHeight < 54)
-                Set_MenuBar_Visibility(startMenu.Translation != new Vector3(0, 900, 40));
-            startMenu.Translation = startMenu.Translation == new Vector3(0, 900, 40) ? new Vector3(0, 0, 40) : new Vector3(0, 900, 40);
-            ElementSoundPlayer.Play(startMenu.Translation != new Vector3(0, 900, 40) ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
+                Set_MenuBar_Visibility(startMenu.Visibility == Visibility.Visible);
+            startMenu.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            ElementSoundPlayer.Play(startMenu.Visibility == Visibility.Visible ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
         }
         private void GameView_Open(object sender, RoutedEventArgs e)
         {
@@ -656,10 +656,10 @@ namespace Windows_Mobile
 
             Set_MenuBar_Visibility(gameView.Visibility == Visibility.Collapsed);
 
-            notifCenter.Translation = new Vector3(400, 0, 0);
+            notifCenter.Visibility = Visibility.Collapsed;
             notifCenterButton.IsChecked = false;
 
-            startMenu.Translation = new Vector3(0, 900, 40);
+            startMenu.Visibility = Visibility.Collapsed;
             startMenuButton.IsChecked = false;
         }
 
