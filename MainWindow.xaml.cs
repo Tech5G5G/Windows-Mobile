@@ -645,7 +645,7 @@ namespace Windows_Mobile
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
             if (AppWindow.Size.Height - 70 - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) < 54)
-                Set_MenuBar_Visibility(startMenu.Visibility == Visibility.Visible);
+                topAutoSuggestBox.Visibility = menuBar.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
             startMenu.Visibility = startMenu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
             ElementSoundPlayer.Play(startMenu.Visibility == Visibility.Visible ? ElementSoundKind.MovePrevious : ElementSoundKind.MoveNext);
         }
@@ -654,7 +654,7 @@ namespace Windows_Mobile
             ElementSoundPlayer.Play(gameView.Visibility == Visibility.Visible ? ElementSoundKind.Hide : ElementSoundKind.Show);
             gameView.Visibility = gameView.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
-            Set_MenuBar_Visibility(gameView.Visibility == Visibility.Collapsed);
+            topAutoSuggestBox.Visibility = menuBar.Visibility = gameView.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
 
             notifCenter.Visibility = Visibility.Collapsed;
             notifCenterButton.IsChecked = false;
@@ -854,11 +854,15 @@ namespace Windows_Mobile
                 launcherGrid.Visibility = menuBarTray.Visibility = Visibility.Visible;
                 allSearchList.Visibility = Visibility.Collapsed;
                 sender.CornerRadius = new CornerRadius(20);
-                sender.Translation = Vector3.Zero;
+
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: menuBarOriginalSize.Width, from: 698, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 animationBuilder.Size(axis: Axis.Y, to: menuBarOriginalSize.Height, from: menuBar.ActualHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                AnimationBuilder.Create().Size(axis: Axis.X, to: 400, from: 674, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+
+                var senderAnimationBuilder = AnimationBuilder.Create();
+                senderAnimationBuilder.Size(axis: Axis.X, to: 400, from: 674, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+                senderAnimationBuilder.Translation(to: Vector2.Zero, from: new Vector2(0, 5), duration: TimeSpan.FromMilliseconds(300), easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+                
                 menuBarAnimated = false;
             }
             else if (menuBarAnimated == false && !string.IsNullOrWhiteSpace(sender.Text))
@@ -866,11 +870,15 @@ namespace Windows_Mobile
                 launcherGrid.Visibility = menuBarTray.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
-                sender.Translation = new Vector3(0, 5, 0);
+
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+
+                var senderAnimationBuilder = AnimationBuilder.Create();
+                senderAnimationBuilder.Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+                senderAnimationBuilder.Translation(to: new Vector2(0, 5), from: Vector2.Zero, duration: TimeSpan.FromMilliseconds(300), easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+                
                 menuBarAnimated = true;
             }
             else if (menuBarAnimated is null && !string.IsNullOrWhiteSpace(sender.Text))
@@ -880,11 +888,15 @@ namespace Windows_Mobile
                 launcherGrid.Visibility = menuBarTray.Visibility = Visibility.Collapsed;
                 allSearchList.Visibility = Visibility.Visible;
                 sender.CornerRadius = new CornerRadius(4);
-                sender.Translation = new Vector3(0, 5, 0);
+
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
                 animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                AnimationBuilder.Create().Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+
+                var senderAnimationBuilder = AnimationBuilder.Create();
+                senderAnimationBuilder.Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+                senderAnimationBuilder.Translation(to: new Vector2(0, 5), from: Vector2.Zero, duration: TimeSpan.FromMilliseconds(300), easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
+
                 menuBarAnimated = true;
             }
 
@@ -916,7 +928,6 @@ namespace Windows_Mobile
                     AnimationBuilder.Create().Size(axis: Axis.Y, to: newHeight, from: oldHeight, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
             }
         }
-        private void Set_MenuBar_Visibility(bool visibility) => topAutoSuggestBox.Translation = menuBar.Translation = visibility ? Vector3.Zero : new Vector3(0, -64, 0);
 
         private void SoundSwitch_Toggled(object sender, RoutedEventArgs e) => ElementSoundPlayer.State = (sender as ToggleSwitch).IsOn ? ElementSoundPlayerState.On : ElementSoundPlayerState.Off;
     }
