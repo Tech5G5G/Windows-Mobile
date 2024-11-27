@@ -35,8 +35,6 @@
     <PackageReference Include="CoreAudio" Version="1.40.0" />
     <PackageReference Include="craftersmine.SteamGridDB.Net" Version="1.1.7" />
     <PackageReference Include="GameFinder" Version="4.3.3" />
-    <PackageReference Include="Gameloop.Vdf" Version="0.6.2" />
-    <PackageReference Include="Gameloop.Vdf.JsonConverter" Version="0.2.1" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240802000" />
