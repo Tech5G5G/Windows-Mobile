@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using System.Diagnostics;
 using CommunityToolkit.WinUI.Animations;
+using CommunityToolkit.WinUI.Collections;
 using Windows.Networking.Connectivity;
 using Windows.Devices.Power;
 using CoreAudio;
@@ -26,11 +27,12 @@ namespace Windows_Mobile
 {
     public sealed partial class MainWindow : Window
     {
-        ObservableCollection<StartMenuItem> allApps = [];
-        ObservableCollection<StartMenuItem> gamesList = [];
-        ObservableCollection<StartMenuItem> launcherList = [];
-        ObservableCollection<StartMenuItem> appsList = [];
-        ObservableCollection<StartMenuItem> allSearch = [];
+        static ObservableCollection<StartMenuItem> allApps = [];
+        AdvancedCollectionView games = new(allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.SteamGame || ((StartMenuItem)i).ItemKind == ApplicationKind.EpicGamesGame || ((StartMenuItem)i).ItemKind == ApplicationKind.GOGGame || ((StartMenuItem)i).ItemKind == ApplicationKind.XboxGame };
+        AdvancedCollectionView launchers = new (allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.Launcher || ((StartMenuItem)i).ItemKind == ApplicationKind.LauncherPackaged };
+        AdvancedCollectionView apps = new(allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.Normal || ((StartMenuItem)i).ItemKind == ApplicationKind.Packaged };
+        AdvancedCollectionView search = new(allApps, true);
+
         ObservableCollection<MCModInfo> mods = [];
         ObservableCollection<Indexing.Notification> notifications = [];
 
@@ -44,7 +46,11 @@ namespace Windows_Mobile
             startMenu.Height = (AppWindow.Size.Height * 7) / 8;
             startNV.SelectedItem = games_NavItem;
 
-            allSearch.CollectionChanged += (sender, e) => MenuBar_HeightUpdate();
+            search.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName == "Count")
+                    MenuBar_HeightUpdate();
+            };
             clearAllButton.Click += (sender, e) =>
             {
                 var count = notifications.Count - 1;
@@ -631,6 +637,11 @@ namespace Windows_Mobile
 
         private async void PopulateStartMenu()
         {
+            games.SortDescriptions.Add(new SortDescription("ItemName", SortDirection.Ascending));
+            launchers.SortDescriptions.Add(new SortDescription("ItemName", SortDirection.Ascending));
+            apps.SortDescriptions.Add(new SortDescription("ItemName", SortDirection.Ascending));
+            search.SortDescriptions.Add(new SortDescription("ItemName", SortDirection.Ascending));
+
             await Indexers.IndexSteamGames(allApps);
             await Indexers.IndexEGSGames(allApps);
             //await Indexers.IndexEAGames(allApps);
@@ -639,38 +650,6 @@ namespace Windows_Mobile
             Indexers.IndexMCMods(mods);
             Indexers.IndexStartMenuFolder("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
             Indexers.IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
-            AddAppsToStartMenu();
-        }
-        private void AddAppsToStartMenu()
-        {
-            var ordered = from item in allApps orderby item.ItemName[..1] select item;
-            var orderedList = ordered.ToList();
-            allApps.Clear();
-
-            foreach (StartMenuItem item in orderedList)
-            {
-                if (!item.IsDuplicate(allApps))
-                {
-                    switch (item.ItemKind)
-                    {
-                        case ApplicationKind.Packaged:
-                        case ApplicationKind.Normal:
-                            appsList.Add(item);
-                            break;
-                        case ApplicationKind.SteamGame:
-                        case ApplicationKind.EpicGamesGame:
-                        case ApplicationKind.GOGGame:
-                        case ApplicationKind.XboxGame:
-                            gamesList.Add(item);
-                            break;
-                        case ApplicationKind.LauncherPackaged:
-                        case ApplicationKind.Launcher:
-                            launcherList.Add(item);
-                            break;
-                    }
-                    allApps.Add(item);
-                }
-            }
         }
 
         private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
@@ -704,38 +683,23 @@ namespace Windows_Mobile
         {
             if ((NavigationViewItem)args.SelectedItem != mc_NavItem)
             {
-                apps.ItemTemplate = (this.Content as Grid).Resources["StartMenuItemTemplate"] as DataTemplate;
-                apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = (NavigationViewItem)args.SelectedItem == games_NavItem ? gamesList : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? launcherList : appsList });
+                appsView.ItemTemplate = (this.Content as Grid).Resources["StartMenuItemTemplate"] as DataTemplate;
+                appsView.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = (NavigationViewItem)args.SelectedItem == games_NavItem ? games : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? launchers : apps });
                 autoSuggestBox.PlaceholderText = (NavigationViewItem)args.SelectedItem == games_NavItem ? "Search games" : (NavigationViewItem)args.SelectedItem == launchers_NavItem ? "Search launchers" : "Search apps";
                 autoSuggestBox.Text = null;
             }
             else
             {
-                apps.ItemTemplate = (this.Content as Grid).Resources["ModTemplate"] as DataTemplate;
-                apps.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = mods });
+                appsView.ItemTemplate = (this.Content as Grid).Resources["ModTemplate"] as DataTemplate;
+                appsView.SetBinding(ItemsControl.ItemsSourceProperty, new Binding() { Source = mods });
             }
         }
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            List<ApplicationKind> applicationTypes = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? [ApplicationKind.SteamGame, ApplicationKind.EpicGamesGame, ApplicationKind.XboxGame] : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? [ApplicationKind.Launcher, ApplicationKind.LauncherPackaged] : [ApplicationKind.Normal, ApplicationKind.Packaged];
-            ObservableCollection<StartMenuItem> list = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? gamesList : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? launcherList : appsList;
-            var filteredUnordered = allApps.Where(entry => entry.ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase));
-            var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
-
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                var item = list[i];
-
-                if (!filtered.Contains(item))
-                    list.Remove(item);
+            ApplicationKind appKind = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? ApplicationKind.SteamGame | ApplicationKind.EpicGamesGame | ApplicationKind.GOGGame | ApplicationKind.XboxGame : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? ApplicationKind.Launcher | ApplicationKind.LauncherPackaged : ApplicationKind.Normal | ApplicationKind.Packaged;
+            AdvancedCollectionView list = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? games : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? launchers : apps;
+            list.Filter = i => appKind.HasFlag(((StartMenuItem)i).ItemKind) && ((StartMenuItem)i).ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase);
             }
-
-            foreach (StartMenuItem item in filtered)
-            {
-                if (!list.Contains(item) && applicationTypes.Contains(item.ItemKind))
-                    list.Add(item);
-            }
-        }
         private async void Apps_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is not null)
@@ -844,17 +808,17 @@ namespace Windows_Mobile
                 case ApplicationKind.SteamGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Contains("Steam", StringComparison.InvariantCultureIgnoreCase)));
+                    uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Contains("Steam", StringComparison.InvariantCultureIgnoreCase)));
                     break;
                 case ApplicationKind.EpicGamesGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Contains("Epic", StringComparison.InvariantCultureIgnoreCase)));
+                    uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Contains("Epic", StringComparison.InvariantCultureIgnoreCase)));
                     break;
                 case ApplicationKind.GOGGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => App.StartApplication(launcherList.First(i => i.ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
+                    uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
                     break;
                 case ApplicationKind.XboxGame:
                     openButton.Text = "Play";
@@ -905,7 +869,7 @@ namespace Windows_Mobile
 
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: ((search.Count * 36) + ((search.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
 
                 var senderAnimationBuilder = AnimationBuilder.Create();
                 senderAnimationBuilder.Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
@@ -923,7 +887,7 @@ namespace Windows_Mobile
 
                 var animationBuilder = AnimationBuilder.Create();
                 animationBuilder.Size(axis: Axis.X, to: 698, from: menuBarOriginalSize.Width, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
-                animationBuilder.Size(axis: Axis.Y, to: ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
+                animationBuilder.Size(axis: Axis.Y, to: ((search.Count * 36) + ((search.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400)), from: menuBarOriginalSize.Height, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(menuBar);
 
                 var senderAnimationBuilder = AnimationBuilder.Create();
                 senderAnimationBuilder.Size(axis: Axis.X, to: 674, from: 400, duration: TimeSpan.FromMilliseconds(500), easingType: EasingType.Default, easingMode: Microsoft.UI.Xaml.Media.Animation.EasingMode.EaseOut, layer: FrameworkLayer.Xaml).Start(sender);
@@ -932,28 +896,13 @@ namespace Windows_Mobile
                 menuBarAnimated = true;
             }
 
-            var filteredUnordered = allApps.Where(entry => entry.ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase));
-            var filtered = from item in filteredUnordered orderby item.ItemName[..1] select item;
-
-            for (int i = allSearch.Count - 1; i >= 0; i--)
-            {
-                var item = allSearch[i];
-
-                if (!filtered.Contains(item))
-                    allSearch.Remove(item);
-            }
-
-            foreach (StartMenuItem item in filtered)
-            {
-                if (!allSearch.Contains(item))
-                    allSearch.Add(item);
-            }
+            search.Filter = i => ((StartMenuItem)i).ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase);
         }
         private void MenuBar_HeightUpdate()
         {
             if (menuBarAnimated == true)
             {
-                var newHeight = ((allSearch.Count * 36) + ((allSearch.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400));
+                var newHeight = ((search.Count * 36) + ((search.Count - 1) * 4) + 70).Clamp(((int)startMenu.Height).Clamp(600, 400));
                 var oldHeight = menuBar.ActualHeight;
 
                 if (newHeight != oldHeight && newHeight != 64)
