@@ -130,6 +130,7 @@ namespace Windows_Mobile.Indexing
                         GameInfo = gameInfo,
                         Id = steamGame.AppId.Value.ToString()
                     };
+                    if (!MenuItem.IsDuplicate(allApps))
                     allApps.Add(MenuItem);
                 }
             }
@@ -165,6 +166,7 @@ namespace Windows_Mobile.Indexing
                         Icon = bitmapImage,
                         GameInfo = game
                     };
+                    if (!MenuItem.IsDuplicate(allApps))
                     allApps.Add(MenuItem);
                 }
             }
@@ -203,7 +205,8 @@ namespace Windows_Mobile.Indexing
         //            Icon = bitmapImage,
         //            GameInfo = gameInfo
         //        };
-        //        allApps.Add(MenuItem);
+        //        if (!MenuItem.IsDuplicate(allApps))
+        //          allApps.Add(MenuItem);
         //    }
         //}
 
@@ -242,6 +245,7 @@ namespace Windows_Mobile.Indexing
                         GameInfo = gameInfo,
                         Id = gogGame.Id.Value.ToString()
                     };
+                    if (!MenuItem.IsDuplicate(allApps))
                     allApps.Add(MenuItem);
                 }
             }
@@ -309,6 +313,7 @@ namespace Windows_Mobile.Indexing
                                     ItemKind = ApplicationKind.Packaged,
                                     Icon = new BitmapImage() { UriSource = new Uri(package.Logo.AbsoluteUri.Replace("WindowsSecuritySplashScreen.scale-200.png", "WindowsSecurityAppList.targetsize-256.png").Replace("WindowsSecuritySplashScreen.scale-100.png", "WindowsSecurityAppList.targetsize-256.png")) }
                                 };
+                                if (!SecurityMenuItem.IsDuplicate(allApps))
                                 allApps.Add(SecurityMenuItem);
                                 break;
                             case "Windows Backup":
@@ -319,6 +324,7 @@ namespace Windows_Mobile.Indexing
                                     ItemKind = ApplicationKind.Packaged,
                                     Icon = new BitmapImage() { UriSource = new Uri(@"C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\WindowsBackup\Assets\AppList.targetsize-256.png") }
                                 };
+                                if (!BackupMenuItem.IsDuplicate(allApps))
                                 allApps.Add(BackupMenuItem);
                                 break;
                             case "Get Started":
@@ -329,6 +335,7 @@ namespace Windows_Mobile.Indexing
                                     ItemKind = ApplicationKind.Packaged,
                                     Icon = new BitmapImage() { UriSource = new Uri(@"C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\Assets\GetStartedAppList.targetsize-256.png") }
                                 };
+                                if (!GetStartedMenuItem.IsDuplicate(allApps))
                                 allApps.Add(GetStartedMenuItem);
                                 break;
                             case "Xbox":
@@ -339,6 +346,7 @@ namespace Windows_Mobile.Indexing
                                     ItemKind = ApplicationKind.LauncherPackaged,
                                     Icon = new BitmapImage() { UriSource = package.Logo }
                                 };
+                                if (!XboxMenuItem.IsDuplicate(allApps))
                                 allApps.Add(XboxMenuItem);
                                 break;
                             case "Roblox":
@@ -350,6 +358,7 @@ namespace Windows_Mobile.Indexing
                                     Icon = new BitmapImage() { UriSource = package.Logo },
                                     GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
                                 };
+                                if (!RobloxMenuItem.IsDuplicate(allApps))
                                 allApps.Add(RobloxMenuItem);
                                 break;
                             default:
@@ -430,6 +439,7 @@ namespace Windows_Mobile.Indexing
                             GameInfo = game
                         };
 
+                        if (!MenuItem.IsDuplicate(allApps))
                         allApps.Add(MenuItem);
                     }
                 }
