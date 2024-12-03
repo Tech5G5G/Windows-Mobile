@@ -25,16 +25,17 @@ namespace Windows_Mobile.Indexing
     }
 
     ///<summary>Used for sorting and starting applications</summary>
+    [Flags]
     public enum ApplicationKind
     {
-        Normal,
-        SteamGame,
-        EpicGamesGame,
-        GOGGame,
-        XboxGame,
-        Launcher,
-        LauncherPackaged,
-        Packaged
+        SteamGame = 1,
+        EpicGamesGame = 2,
+        GOGGame = 4,
+        XboxGame = 8,
+        Launcher = 16,
+        LauncherPackaged = 32,
+        Packaged = 64,
+        Normal = 128
     }
 
     /// <summary>Represents an item in the start menu</summary>
