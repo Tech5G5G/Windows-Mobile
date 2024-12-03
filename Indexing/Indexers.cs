@@ -131,7 +131,7 @@ namespace Windows_Mobile.Indexing
                         Id = steamGame.AppId.Value.ToString()
                     };
                     if (!MenuItem.IsDuplicate(allApps))
-                    allApps.Add(MenuItem);
+                        allApps.Add(MenuItem);
                 }
             }
         }
@@ -167,7 +167,7 @@ namespace Windows_Mobile.Indexing
                         GameInfo = game
                     };
                     if (!MenuItem.IsDuplicate(allApps))
-                    allApps.Add(MenuItem);
+                        allApps.Add(MenuItem);
                 }
             }
             else
@@ -246,7 +246,7 @@ namespace Windows_Mobile.Indexing
                         Id = gogGame.Id.Value.ToString()
                     };
                     if (!MenuItem.IsDuplicate(allApps))
-                    allApps.Add(MenuItem);
+                        allApps.Add(MenuItem);
                 }
             }
         }
@@ -314,7 +314,7 @@ namespace Windows_Mobile.Indexing
                                     Icon = new BitmapImage() { UriSource = new Uri(package.Logo.AbsoluteUri.Replace("WindowsSecuritySplashScreen.scale-200.png", "WindowsSecurityAppList.targetsize-256.png").Replace("WindowsSecuritySplashScreen.scale-100.png", "WindowsSecurityAppList.targetsize-256.png")) }
                                 };
                                 if (!SecurityMenuItem.IsDuplicate(allApps))
-                                allApps.Add(SecurityMenuItem);
+                                    allApps.Add(SecurityMenuItem);
                                 break;
                             case "Windows Backup":
                                 var BackupMenuItem = new StartMenuItem()
@@ -325,7 +325,7 @@ namespace Windows_Mobile.Indexing
                                     Icon = new BitmapImage() { UriSource = new Uri(@"C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\WindowsBackup\Assets\AppList.targetsize-256.png") }
                                 };
                                 if (!BackupMenuItem.IsDuplicate(allApps))
-                                allApps.Add(BackupMenuItem);
+                                    allApps.Add(BackupMenuItem);
                                 break;
                             case "Get Started":
                                 var GetStartedMenuItem = new StartMenuItem()
@@ -336,7 +336,7 @@ namespace Windows_Mobile.Indexing
                                     Icon = new BitmapImage() { UriSource = new Uri(@"C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\Assets\GetStartedAppList.targetsize-256.png") }
                                 };
                                 if (!GetStartedMenuItem.IsDuplicate(allApps))
-                                allApps.Add(GetStartedMenuItem);
+                                    allApps.Add(GetStartedMenuItem);
                                 break;
                             case "Xbox":
                                 var XboxMenuItem = new StartMenuItem()
@@ -347,7 +347,7 @@ namespace Windows_Mobile.Indexing
                                     Icon = new BitmapImage() { UriSource = package.Logo }
                                 };
                                 if (!XboxMenuItem.IsDuplicate(allApps))
-                                allApps.Add(XboxMenuItem);
+                                    allApps.Add(XboxMenuItem);
                                 break;
                             case "Roblox":
                                 var RobloxMenuItem = new StartMenuItem()
@@ -359,7 +359,7 @@ namespace Windows_Mobile.Indexing
                                     GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
                                 };
                                 if (!RobloxMenuItem.IsDuplicate(allApps))
-                                allApps.Add(RobloxMenuItem);
+                                    allApps.Add(RobloxMenuItem);
                                 break;
                             default:
                                 var MenuItem = new StartMenuItem()
@@ -369,7 +369,8 @@ namespace Windows_Mobile.Indexing
                                     ItemKind = ApplicationKind.Packaged,
                                     Icon = new BitmapImage() { UriSource = package.Logo }
                                 };
-                                allApps.Add(MenuItem);
+                                if (!MenuItem.IsDuplicate(allApps))
+                                    allApps.Add(MenuItem);
                                 break;
 
                         }
@@ -378,7 +379,7 @@ namespace Windows_Mobile.Indexing
             }
         }
 
-        public static void IndexStartMenuFolder(string userItemsDirectory, ObservableCollection<StartMenuItem> allApps)
+        public static async void IndexStartMenuFolder(string userItemsDirectory, ObservableCollection<StartMenuItem> allApps)
         {
             IEnumerable<string> userStartMenuItems = Directory.EnumerateFiles(userItemsDirectory);
             string[] userStartMenuFolders = Directory.GetDirectories(userItemsDirectory);
@@ -400,7 +401,7 @@ namespace Windows_Mobile.Indexing
                     string targetPath = shellFile.Properties.System.Link.TargetParsingPath.Value;
                     string arguments = shellFile.Properties.System.Link.Arguments.Value is not null ? shellFile.Properties.System.Link.Arguments.Value : string.Empty;
 
-                    if (targetPath is not null && !targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
+                    if (targetPath is not null && !targetPath.EndsWith("RobloxPlayerBeta.exe", StringComparison.InvariantCultureIgnoreCase) && !targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
                     {
                         BitmapImage bitmapImage = new();
                         ApplicationKind appKind = targetPath.Contains("Steam.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.Contains("EpicGamesLauncher.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.EndsWith("GalaxyClient.exe", StringComparison.InvariantCultureIgnoreCase) ? ApplicationKind.Launcher : ApplicationKind.Normal;
@@ -440,7 +441,7 @@ namespace Windows_Mobile.Indexing
                         };
 
                         if (!MenuItem.IsDuplicate(allApps))
-                        allApps.Add(MenuItem);
+                            allApps.Add(MenuItem);
                     }
                 }
             }
