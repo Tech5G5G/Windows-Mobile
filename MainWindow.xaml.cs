@@ -911,5 +911,31 @@ namespace Windows_Mobile
         }
 
         private void SoundSwitch_Toggled(object sender, RoutedEventArgs e) => ElementSoundPlayer.State = (sender as ToggleSwitch).IsOn ? ElementSoundPlayerState.On : ElementSoundPlayerState.Off;
+
+        private async void PowerMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ProcessStartInfo processInfo = null;
+            var dialog = new ContentDialog() { XamlRoot = this.Content.XamlRoot, PrimaryButtonText = "Yes", CloseButtonText = "No", DefaultButton = ContentDialogButton.Primary };
+
+            switch ((sender as MenuFlyoutItem).Text)
+            {
+                case "Lock":
+                    App.LockWorkStation();
+                    return;
+                case "Shut down":
+                    processInfo = new ProcessStartInfo("shutdown", "/s /t 0") { CreateNoWindow = true };
+                    dialog.Title = "Shut down";
+                    dialog.Content = "Are you sure you want to shut down?";
+                    break;
+                case "Restart":
+                    processInfo = new ProcessStartInfo("shutdown", "/r /t 0") { CreateNoWindow = true };
+                    dialog.Title = "Restart";
+                    dialog.Content = "Are you sure you want to restart?";
+                    break;
+            }
+
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+                Process.Start(processInfo);
+        }
     }
 }

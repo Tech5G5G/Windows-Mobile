@@ -9,6 +9,7 @@ using Windows.Management.Deployment;
 using Windows_Mobile.Indexing;
 using craftersmine.SteamGridDBNet;
 using Windows.Storage;
+using System.Runtime.InteropServices;
 
 namespace Windows_Mobile
 {
@@ -41,6 +42,12 @@ namespace Windows_Mobile
         public static Window MainWindow { get; set; }
 
         public static SteamGridDb db { get; set; }
+
+        [DllImport("user32")]
+        public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
+
+        [DllImport("user32.dll")]
+        public static extern bool LockWorkStation();
 
         public async static void StartApplication(StartMenuItem selectedItemInfo, bool runAsAdmin = false)
         {

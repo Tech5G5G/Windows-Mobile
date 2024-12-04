@@ -131,7 +131,15 @@
                     </NavigationView>
                 </Grid>
                 <StackPanel VerticalAlignment="Bottom" Margin="52,12" HorizontalAlignment="Right">
-                    <Button Content="{ui:FontIcon FontSize=16, Glyph=&#xE7E8;}" ToolTipService.ToolTip="Power" Height="40" Width="40" Background="Transparent" BorderThickness="0" />
+                    <Button Content="{ui:FontIcon FontSize=16, Glyph=&#xE7E8;}" ToolTipService.ToolTip="Power" Height="40" Width="40" Background="Transparent" BorderThickness="0">
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE72E;}" Text="Lock" Click="PowerMenuItem_Click" />
+                                <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE7E8;}" Text="Shut down" Click="PowerMenuItem_Click" />
+                                <MenuFlyoutItem Icon="{ui:FontIcon Glyph=&#xE777;}" Text="Restart" Click="PowerMenuItem_Click" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
                 </StackPanel>
                 <Grid.Shadow>
                     <ThemeShadow />
