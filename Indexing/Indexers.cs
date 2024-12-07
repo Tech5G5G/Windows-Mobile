@@ -356,7 +356,7 @@ namespace Windows_Mobile.Indexing
                                     ItemStartURI = package.Id.FullName,
                                     ItemKind = ApplicationKind.XboxGame,
                                     Icon = new BitmapImage() { UriSource = package.Logo },
-                                    GameInfo = (await App.db.SearchForGamesAsync(appListEntry.DisplayInfo.DisplayName)).First()
+                                    GameInfo = await App.db.GetGameByIdAsync(35464)
                                 };
                                 if (!RobloxMenuItem.IsDuplicate(allApps))
                                     allApps.Add(RobloxMenuItem);
@@ -401,7 +401,23 @@ namespace Windows_Mobile.Indexing
                     string targetPath = shellFile.Properties.System.Link.TargetParsingPath.Value;
                     string arguments = shellFile.Properties.System.Link.Arguments.Value is not null ? shellFile.Properties.System.Link.Arguments.Value : string.Empty;
 
-                    if (targetPath is not null && !targetPath.EndsWith("RobloxPlayerBeta.exe", StringComparison.InvariantCultureIgnoreCase) && !targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
+                    if (targetPath is not null && targetPath.EndsWith("RobloxPlayerBeta.exe", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var game = await App.db.GetGameByIdAsync(35464);
+
+                        var MenuItem = new StartMenuItem()
+                        {
+                            ItemName = name,
+                            ItemStartURI = item,
+                            ItemKind = ApplicationKind.RobloxPlayer,
+                            Icon = new BitmapImage() { UriSource = new Uri((await App.db.GetIconsForGameAsync(game))[0].FullImageUrl) },
+                            GameInfo = game
+                        };
+
+                        if (!MenuItem.IsDuplicate(allApps))
+                            allApps.Add(MenuItem);
+                    }
+                    else if (targetPath is not null && !targetPath.StartsWith("steam://rungameid/") && !targetPath.StartsWith("com.epicgames.launcher://") && !targetPath.Contains("unins000.exe", StringComparison.InvariantCultureIgnoreCase) && !name.Contains("Uninstall", StringComparison.InvariantCultureIgnoreCase) && !(arguments.Contains("/command=runGame", StringComparison.InvariantCultureIgnoreCase) && arguments.Contains("/gameId=", StringComparison.InvariantCultureIgnoreCase)))
                     {
                         BitmapImage bitmapImage = new();
                         ApplicationKind appKind = targetPath.Contains("Steam.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.Contains("EpicGamesLauncher.exe", StringComparison.InvariantCultureIgnoreCase) || targetPath.EndsWith("GalaxyClient.exe", StringComparison.InvariantCultureIgnoreCase) ? ApplicationKind.Launcher : ApplicationKind.Normal;

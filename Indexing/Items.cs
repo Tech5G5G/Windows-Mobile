@@ -31,11 +31,12 @@ namespace Windows_Mobile.Indexing
         SteamGame = 1,
         EpicGamesGame = 2,
         GOGGame = 4,
-        XboxGame = 8,
-        Launcher = 16,
-        LauncherPackaged = 32,
-        Packaged = 64,
-        Normal = 128
+        RobloxPlayer = 8,
+        XboxGame = 16,
+        Launcher = 32,
+        LauncherPackaged = 64,
+        Packaged = 128,
+        Normal = 256
     }
 
     /// <summary>Represents an item in the start menu</summary>

@@ -28,7 +28,7 @@ namespace Windows_Mobile
     public sealed partial class MainWindow : Window
     {
         static ObservableCollection<StartMenuItem> allApps = [];
-        AdvancedCollectionView games = new(allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.SteamGame || ((StartMenuItem)i).ItemKind == ApplicationKind.EpicGamesGame || ((StartMenuItem)i).ItemKind == ApplicationKind.GOGGame || ((StartMenuItem)i).ItemKind == ApplicationKind.XboxGame };
+        AdvancedCollectionView games = new(allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.SteamGame || ((StartMenuItem)i).ItemKind == ApplicationKind.EpicGamesGame || ((StartMenuItem)i).ItemKind == ApplicationKind.GOGGame || ((StartMenuItem)i).ItemKind == ApplicationKind.XboxGame || ((StartMenuItem)i).ItemKind == ApplicationKind.RobloxPlayer };
         AdvancedCollectionView launchers = new (allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.Launcher || ((StartMenuItem)i).ItemKind == ApplicationKind.LauncherPackaged };
         AdvancedCollectionView apps = new(allApps, true) { Filter = i => ((StartMenuItem)i).ItemKind == ApplicationKind.Normal || ((StartMenuItem)i).ItemKind == ApplicationKind.Packaged };
         AdvancedCollectionView search = new(allApps, true);
@@ -696,10 +696,10 @@ namespace Windows_Mobile
         }
         private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            ApplicationKind appKind = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? ApplicationKind.SteamGame | ApplicationKind.EpicGamesGame | ApplicationKind.GOGGame | ApplicationKind.XboxGame : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? ApplicationKind.Launcher | ApplicationKind.LauncherPackaged : ApplicationKind.Normal | ApplicationKind.Packaged;
+            ApplicationKind appKind = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? ApplicationKind.SteamGame | ApplicationKind.EpicGamesGame | ApplicationKind.GOGGame | ApplicationKind.RobloxPlayer | ApplicationKind.XboxGame : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? ApplicationKind.Launcher | ApplicationKind.LauncherPackaged : ApplicationKind.Normal | ApplicationKind.Packaged;
             AdvancedCollectionView list = (NavigationViewItem)startNV.SelectedItem == games_NavItem ? games : (NavigationViewItem)startNV.SelectedItem == launchers_NavItem ? launchers : apps;
             list.Filter = i => appKind.HasFlag(((StartMenuItem)i).ItemKind) && ((StartMenuItem)i).ItemName.Contains(sender.Text, StringComparison.InvariantCultureIgnoreCase);
-            }
+        }
         private async void Apps_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is not null)
@@ -727,7 +727,7 @@ namespace Windows_Mobile
                         else if (selection == ContentDialogResult.Secondary)
                             Process.Start(new ProcessStartInfo($"steam://openurl/https://store.steampowered.com/app/{selectedItemInfo.Id}") { UseShellExecute = true });
                     }
-                    else if (selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame)
+                    else if (selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame || selectedItemInfo.ItemKind == ApplicationKind.RobloxPlayer)
                     {
                         var selection = await dialog.ShowAsync();
 
@@ -820,6 +820,7 @@ namespace Windows_Mobile
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
                     uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
                     break;
+                case ApplicationKind.RobloxPlayer:
                 case ApplicationKind.XboxGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
