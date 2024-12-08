@@ -255,47 +255,8 @@ namespace Windows_Mobile
             if (getAll)
             {
                 var notifications = await sender.GetNotificationsAsync(NotificationKinds.Toast);
-
                 foreach (var notification in notifications)
-                {
-                    NotificationBinding binding = notification.Notification.Visual.GetBinding(KnownNotificationBindings.ToastGeneric);
-                    var text = binding.GetTextElements();
-
-                    string titleText = text.Count == 0 ? "New notification" : text.First().Text;
-                    string bodyText = string.Empty;
-                    for (int i = 1; i < text.Count; i++)
-                    {
-                        var textblock = text[i];
-                        bodyText = bodyText + textblock.Text + "\n";
-                    }
-
-                    this.DispatcherQueue.TryEnqueue(async () =>
-                    {
-                        BitmapImage bmp = new();
-                        if (!string.IsNullOrWhiteSpace(notification.AppInfo.PackageFamilyName))
-                        {
-                            try
-                            {
-                                var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
-                                bmp = entry.Icon;
-                            }
-                            catch { bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync()); }
-                            var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
-                            this.notifications.Insert(0, notif);
-                        }
-                        else
-                        {
-                            try
-                            {
-                                var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
-                                bmp = entry.Icon;
-                            }
-                            catch { }
-                            var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName };
-                            this.notifications.Insert(0, notif);
-                        }
-                    });
-                }
+                    this.DispatcherQueue.TryEnqueue(async () => this.notifications.Insert(0, await Notifications.Notification.FromUserNotification(notification, allApps)));
             }
             else if (changeKind == UserNotificationChangedKind.Added)
             {
@@ -303,44 +264,7 @@ namespace Windows_Mobile
                 UserNotification notification = null;
                 try { notification = notifications.First(i => i.Id == changedId); }
                 catch { }
-
-                NotificationBinding binding = notification.Notification.Visual.GetBinding(KnownNotificationBindings.ToastGeneric);
-                var text = binding.GetTextElements();
-
-                string titleText = text.Count == 0 ? "New notification" : text.First().Text;
-                string bodyText = string.Empty;
-                for (int i = 1; i < text.Count; i++)
-                {
-                    var textblock = text[i];
-                    bodyText = bodyText + textblock.Text + "\n";
-                }
-
-                this.DispatcherQueue.TryEnqueue(async () =>
-                {
-                    BitmapImage bmp = new();
-                    if (!string.IsNullOrWhiteSpace(notification.AppInfo.PackageFamilyName))
-                    {
-                        try
-                        {
-                            var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
-                            bmp = entry.Icon;
-                        }
-                        catch { bmp.SetSource(await notification.AppInfo.DisplayInfo.GetLogo(new Windows.Foundation.Size(120, 120)).OpenReadAsync()); }
-                        var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName, AppPackageFamilyName = notification.AppInfo.PackageFamilyName };
-                        this.notifications.Insert(0, notif);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            var entry = allApps.First(i => i.ItemName.Contains(notification.AppInfo.DisplayInfo.DisplayName, StringComparison.InvariantCultureIgnoreCase));
-                            bmp = entry.Icon;
-                        }
-                        catch { }
-                        var notif = new Indexing.Notification() { Title = titleText, Body = bodyText, Id = notification.Id, AppIcon = bmp, AppDisplayName = notification.AppInfo.DisplayInfo.DisplayName };
-                        this.notifications.Insert(0, notif);
-                    }
-                });
+                this.DispatcherQueue.TryEnqueue(async () => this.notifications.Insert(0, await Notifications.Notification.FromUserNotification(notification, allApps)));
             }
             else if (changeKind == UserNotificationChangedKind.Removed)
             {
