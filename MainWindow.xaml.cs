@@ -22,6 +22,8 @@ using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
 using Windows.UI.Input.Preview.Injection;
 using Windows.System;
+using Windows.Gaming.Input;
+using Windows_Mobile.Input;
 
 namespace Windows_Mobile
 {
@@ -115,243 +117,101 @@ namespace Windows_Mobile
         private void SetUpControllers()
         {
             var injector = InputInjector.TryCreate();
-            Windows.Gaming.Input.Gamepad.GamepadAdded += (sender, gamepad) =>
+            Gamepad.GamepadAdded += (sender, gamepad) =>
             {
+                bool aEnabled = true;
+                bool bEnabled = true;
+                bool menuEnabled = true;
+
                 bool leftYenabled = true;
                 DateTime? leftYenabledChanged = null;
-
                 bool leftXenabled = true;
                 DateTime? leftXenabledChanged = null;
 
                 bool downEnabled = true;
                 DateTime? downEnabledChanged = null;
-
                 bool leftEnabled = true;
                 DateTime? leftEnabledChanged = null;
-
                 bool rightEnabled = true;
                 DateTime? rightEnabledChanged = null;
-
                 bool upEnabled = true;
                 DateTime? upEnabledChanged = null;
 
                 bool rightTriggerEnabled = true;
                 DateTime? rightTriggerEnabledChanged = null;
-
                 bool leftTriggerEnabled = true;
                 DateTime? leftTriggerEnabledChanged = null;
-
-                bool aEnabled = true;
-                bool bEnabled = true;
-                bool menuEnabled = true;
 
                 var timer = new System.Timers.Timer() { Interval = 1 };
                 timer.Elapsed += (sender, e) =>
                 {
-                    var inputList = new List<InjectedInputKeyboardInfo>();
                     var reading = gamepad.GetCurrentReading();
+                    List<InjectedInputKeyboardInfo> inputList = [];
 
-                    if (reading.LeftThumbstickY < 0.5 && reading.LeftThumbstickY > -0.5 && !leftYenabled)
-                    {
-                        leftYenabledChanged = null;
-                        leftYenabled = true;
+                    var aCheck = GamepadReadingChecker.CheckButton(GamepadButtons.A, VirtualKey.GamepadA, aEnabled, reading);
+                    if (aCheck.InputInfo is not null)
+                        inputList.Add(aCheck.InputInfo);
+                    aEnabled = aCheck.ButtonEnabled;
+                    var bCheck = GamepadReadingChecker.CheckButton(GamepadButtons.B, VirtualKey.GamepadB, bEnabled, reading);
+                    if (bCheck.InputInfo is not null)
+                        inputList.Add(bCheck.InputInfo);
+                    bEnabled = bCheck.ButtonEnabled;
+                    var menuCheck = GamepadReadingChecker.CheckButton(GamepadButtons.Menu, VirtualKey.Application, menuEnabled, reading);
+                    if (menuCheck.InputInfo is not null)
+                        inputList.Add(menuCheck.InputInfo);
+                    menuEnabled = menuCheck.ButtonEnabled;
 
-                        timer.Interval = 1;
-                    }
-                    else if (leftYenabledChanged is not null && DateTime.Now - leftYenabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        if (reading.LeftThumbstickY > 0.5)
-                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
-                        else if (reading.LeftThumbstickY < -0.5)
-                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
+                    var downCheck = GamepadReadingChecker.CheckPadButton(GamepadButtons.DPadDown, VirtualKey.GamepadDPadDown, downEnabledChanged, downEnabled, reading, timer.Interval);
+                    if (downCheck.InputInfo is not null)
+                        inputList.Add(downCheck.InputInfo);
+                    downEnabled = downCheck.ButtonEnabled;
+                    downEnabledChanged = downCheck.ButtonEnabledChanged;
+                    timer.Interval = downCheck.TimerInterval;
+                    var leftCheck = GamepadReadingChecker.CheckPadButton(GamepadButtons.DPadLeft, VirtualKey.GamepadDPadLeft, leftEnabledChanged, leftEnabled, reading, timer.Interval);
+                    if (leftCheck.InputInfo is not null)
+                        inputList.Add(leftCheck.InputInfo);
+                    leftEnabled = leftCheck.ButtonEnabled;
+                    leftEnabledChanged = leftCheck.ButtonEnabledChanged;
+                    timer.Interval = leftCheck.TimerInterval;
+                    var rightCheck = GamepadReadingChecker.CheckPadButton(GamepadButtons.DPadRight, VirtualKey.GamepadDPadRight, rightEnabledChanged, rightEnabled, reading, timer.Interval);
+                    if (rightCheck.InputInfo is not null)
+                        inputList.Add(rightCheck.InputInfo);
+                    rightEnabled = rightCheck.ButtonEnabled;
+                    rightEnabledChanged = rightCheck.ButtonEnabledChanged;
+                    timer.Interval = rightCheck.TimerInterval;
+                    var upCheck = GamepadReadingChecker.CheckPadButton(GamepadButtons.DPadUp, VirtualKey.GamepadDPadUp, upEnabledChanged, upEnabled, reading, timer.Interval);
+                    if (upCheck.InputInfo is not null)
+                        inputList.Add(upCheck.InputInfo);
+                    upEnabled = upCheck.ButtonEnabled;
+                    upEnabledChanged = upCheck.ButtonEnabledChanged;
+                    timer.Interval = upCheck.TimerInterval;
 
-                        timer.Interval = 100;
-                    }
-                    else if (!(reading.LeftThumbstickY < 0.5) && leftYenabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickUp });
-                        leftYenabled = false;
-                        leftYenabledChanged = DateTime.Now;
-                    }
-                    else if (!(reading.LeftThumbstickY > -0.5) && leftYenabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickDown });
-                        leftYenabled = false;
-                        leftYenabledChanged = DateTime.Now;
-                    }
+                    var leftYCheck = GamepadReadingChecker.CheckLeftStick(false, leftYenabledChanged, leftYenabled, reading, timer.Interval);
+                    if (leftYCheck.InputInfo is not null)
+                        inputList.Add(leftYCheck.InputInfo);
+                    leftYenabled = leftYCheck.ButtonEnabled;
+                    leftYenabledChanged = leftYCheck.ButtonEnabledChanged;
+                    timer.Interval = leftYCheck.TimerInterval;
 
-                    if (reading.LeftThumbstickX < 0.5 && reading.LeftThumbstickX > -0.5 && !leftXenabled)
-                    {
-                        leftXenabledChanged = null;
-                        leftXenabled = true;
+                    var leftXCheck = GamepadReadingChecker.CheckLeftStick(true, leftXenabledChanged, leftXenabled, reading, timer.Interval);
+                    if (leftXCheck.InputInfo is not null)
+                        inputList.Add(leftXCheck.InputInfo);
+                    leftXenabled = leftXCheck.ButtonEnabled;
+                    leftXenabledChanged = leftXCheck.ButtonEnabledChanged;
+                    timer.Interval = leftXCheck.TimerInterval;
 
-                        timer.Interval = 1;
-                    }
-                    else if (leftXenabledChanged is not null && DateTime.Now - leftXenabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        if (!(reading.LeftThumbstickX < 0.5))
-                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickRight });
-                        else if (!(reading.LeftThumbstickX > -0.5))
-                            inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickLeft });
-
-                        timer.Interval = 100;
-                    }
-                    else if (!(reading.LeftThumbstickX < 0.5) && leftXenabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickRight });
-                        leftXenabled = false;
-                        leftXenabledChanged = DateTime.Now;
-                    }
-                    else if (!(reading.LeftThumbstickX > -0.5) && leftXenabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftThumbstickLeft });
-                        leftXenabled = false;
-                        leftXenabledChanged = DateTime.Now;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A) && aEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA });
-                        aEnabled = false;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.A) && !aEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadA, KeyOptions = InjectedInputKeyOptions.KeyUp });
-                        aEnabled = true;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && bEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadB });
-                        bEnabled = false;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.B) && !bEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadB, KeyOptions = InjectedInputKeyOptions.KeyUp });
-                        bEnabled = true;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabledChanged is not null && DateTime.Now - downEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadDown });
-                        timer.Interval = 100;
-                    }
-                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && downEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadDown });
-                        downEnabled = false;
-                        downEnabledChanged = DateTime.Now;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadDown) && !downEnabled)
-                    {
-                        timer.Interval = 1;
-
-                        downEnabledChanged = null;
-                        downEnabled = true;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabledChanged is not null && DateTime.Now - leftEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadLeft });
-                        timer.Interval = 100;
-                    }
-                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && leftEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadLeft });
-                        leftEnabled = false;
-                        leftEnabledChanged = DateTime.Now;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadLeft) && !leftEnabled)
-                    {
-                        timer.Interval = 1;
-
-                        leftEnabledChanged = null;
-                        leftEnabled = true;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabledChanged is not null && DateTime.Now - rightEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadRight });
-                        timer.Interval = 100;
-                    }
-                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && rightEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadRight });
-                        rightEnabled = false;
-                        rightEnabledChanged = DateTime.Now;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadRight) && !rightEnabled)
-                    {
-                        timer.Interval = 1;
-
-                        rightEnabledChanged = null;
-                        rightEnabled = true;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabledChanged is not null && DateTime.Now - upEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadUp });
-                        timer.Interval = 100;
-                    }
-                    else if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && upEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadDPadUp });
-                        upEnabled = false;
-                        upEnabledChanged = DateTime.Now;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.DPadUp) && !upEnabled)
-                    {
-                        timer.Interval = 1;
-
-                        upEnabledChanged = null;
-                        upEnabled = true;
-                    }
-
-                    if (reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu) && menuEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.Application });
-                        menuEnabled = false;
-                    }
-                    else if (!reading.Buttons.HasFlag(Windows.Gaming.Input.GamepadButtons.Menu))
-                        menuEnabled = true;
-
-                    if (reading.LeftTrigger > 0.5 && leftTriggerEnabledChanged is not null && DateTime.Now - leftTriggerEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftTrigger });
-                        timer.Interval = 100;
-                    }
-                    else if (reading.LeftTrigger > 0.5 && leftTriggerEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadLeftTrigger });
-                        leftTriggerEnabled = false;
-                        leftTriggerEnabledChanged = DateTime.Now;
-                    }
-                    else if (reading.LeftTrigger < 0.5 && !leftTriggerEnabled)
-                    {
-                        timer.Interval = 1;
-
-                        leftTriggerEnabledChanged = null;
-                        leftTriggerEnabled = true;
-                    }
-
-                    if (reading.RightTrigger > 0.5 && rightTriggerEnabledChanged is not null && DateTime.Now - rightTriggerEnabledChanged.Value > TimeSpan.FromMilliseconds(500))
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadRightTrigger });
-                        timer.Interval = 100;
-                    }
-                    else if (reading.RightTrigger > 0.5 && rightTriggerEnabled)
-                    {
-                        inputList.Add(new InjectedInputKeyboardInfo() { VirtualKey = (ushort)VirtualKey.GamepadRightTrigger });
-                        rightTriggerEnabled = false;
-                        rightTriggerEnabledChanged = DateTime.Now;
-                    }
-                    else if (reading.RightTrigger < 0.5 && !rightTriggerEnabled)
-                    {
-                        timer.Interval = 1;
-
-                        rightTriggerEnabledChanged = null;
-                        rightTriggerEnabled = true;
-                    }
+                    var lTriggerCheck = GamepadReadingChecker.CheckTrigger(true, VirtualKey.GamepadLeftTrigger, leftTriggerEnabledChanged, leftTriggerEnabled, reading, timer.Interval);
+                    if (lTriggerCheck.InputInfo is not null)
+                        inputList.Add(lTriggerCheck.InputInfo);
+                    leftTriggerEnabled = lTriggerCheck.ButtonEnabled;
+                    leftTriggerEnabledChanged = lTriggerCheck.ButtonEnabledChanged;
+                    timer.Interval = lTriggerCheck.TimerInterval;
+                    var rTriggerCheck = GamepadReadingChecker.CheckTrigger(false, VirtualKey.GamepadRightTrigger, rightTriggerEnabledChanged, rightTriggerEnabled, reading, timer.Interval);
+                    if (rTriggerCheck.InputInfo is not null)
+                        inputList.Add(rTriggerCheck.InputInfo);
+                    rightTriggerEnabled = rTriggerCheck.ButtonEnabled;
+                    rightTriggerEnabledChanged = rTriggerCheck.ButtonEnabledChanged;
+                    timer.Interval = rTriggerCheck.TimerInterval;
 
                     if (inputList.Count > 0)
                         injector?.InjectKeyboardInput(inputList);
