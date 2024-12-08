@@ -376,7 +376,7 @@ namespace Windows_Mobile.Indexing
 
             foreach (string folder in userStartMenuFolders)
             {
-                string[] folderItems = Utils.PathUtils.IndexFolder(folder);
+                string[] folderItems = IndexFolder(folder);
 
                 foreach (string item in folderItems)
                     userStartMenuItems = userStartMenuItems.Append(item);
@@ -451,6 +451,24 @@ namespace Windows_Mobile.Indexing
                     }
                 }
             }
+        }
+
+        public static string[] IndexFolder(string folderPath)
+        {
+            string[] files = Directory.GetFiles(folderPath);
+
+            string[] subDirectories = Directory.GetDirectories(folderPath);
+            if (subDirectories.Length != 0)
+            {
+                foreach (string directory in subDirectories)
+                {
+                    string[] subfiles = IndexFolder(directory);
+                    foreach (string subfile in subfiles)
+                        files = [.. files, subfile];
+                }
+            }
+
+            return files;
         }
     }
 }
