@@ -474,7 +474,7 @@ namespace Windows_Mobile
                 var selectedItemInfo = e.ClickedItem as StartMenuItem;
 
                 if (selectedItemInfo.ItemKind == ApplicationKind.Normal || selectedItemInfo.ItemKind == ApplicationKind.Launcher || selectedItemInfo.ItemKind == ApplicationKind.Packaged || selectedItemInfo.ItemKind == ApplicationKind.LauncherPackaged)
-                    App.StartApplication(selectedItemInfo);
+                    ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                 else
                 {
                     var content = new Grid() { Margin = new Thickness(-24) };
@@ -490,7 +490,7 @@ namespace Windows_Mobile
                         var selection = await dialog.ShowAsync();
 
                         if (selection == ContentDialogResult.Primary)
-                            App.StartApplication(selectedItemInfo);
+                            ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
                             Process.Start(new ProcessStartInfo($"steam://openurl/https://store.steampowered.com/app/{selectedItemInfo.Id}") { UseShellExecute = true });
                     }
@@ -499,7 +499,7 @@ namespace Windows_Mobile
                         var selection = await dialog.ShowAsync();
 
                         if (selection == ContentDialogResult.Primary)
-                            App.StartApplication(selectedItemInfo);
+                            ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                     }
                     else if (selectedItemInfo.ItemKind == ApplicationKind.XboxGame)
                     {
@@ -507,7 +507,7 @@ namespace Windows_Mobile
                         var selection = await dialog.ShowAsync();
 
                         if (selection == ContentDialogResult.Primary)
-                            App.StartApplication(selectedItemInfo);
+                            ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
                             Process.Start(new ProcessStartInfo($"msxbox://game/?productId={selectedItemInfo.Id}") { UseShellExecute = true });
                     }
@@ -517,7 +517,7 @@ namespace Windows_Mobile
                         var selection = await dialog.ShowAsync();
 
                         if (selection == ContentDialogResult.Primary)
-                            App.StartApplication(selectedItemInfo);
+                            ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
                             Process.Start(new ProcessStartInfo($"goggalaxy://openGameView/{selectedItemInfo.Id}") { UseShellExecute = true });
                     }
@@ -545,10 +545,10 @@ namespace Windows_Mobile
             var flyout = new MenuFlyout();
 
             var openButton = new MenuFlyoutItem();
-            openButton.Click += (sender, args) => App.StartApplication(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon));
+            openButton.Click += (sender, args) => ApplicationStarter.FromStartMenuItem(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon));
 
             var adminButton = new MenuFlyoutItem() { Text = "Open as admin", Icon = new FontIcon() { Glyph = "\uE7EF" }, Visibility = Visibility.Collapsed };
-            adminButton.Click += (sender, args) => App.StartApplication(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon), true);
+            adminButton.Click += (sender, args) => ApplicationStarter.FromStartMenuItem(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon), true);
 
             var locationButton = new MenuFlyoutItem() { Text = "Open file location", Icon = new FontIcon() { Glyph = "\uED43" }, Visibility = Visibility.Collapsed };
             locationButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("explorer.exe", $"/select, {(senderPanel.Tag as StartMenuItem).ItemStartURI}") { UseShellExecute = true });
@@ -575,17 +575,17 @@ namespace Windows_Mobile
                 case ApplicationKind.SteamGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Contains("Steam", StringComparison.InvariantCultureIgnoreCase)));
+                    uninstallButton.Click += (sender, args) => ApplicationStarter.FromStartMenuItem((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Contains("Steam", StringComparison.InvariantCultureIgnoreCase)));
                     break;
                 case ApplicationKind.EpicGamesGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Contains("Epic", StringComparison.InvariantCultureIgnoreCase)));
+                    uninstallButton.Click += (sender, args) => ApplicationStarter.FromStartMenuItem((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Contains("Epic", StringComparison.InvariantCultureIgnoreCase)));
                     break;
                 case ApplicationKind.GOGGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => App.StartApplication((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
+                    uninstallButton.Click += (sender, args) => ApplicationStarter.FromStartMenuItem((StartMenuItem)launchers.First(i => ((StartMenuItem)i).ItemName.Equals("GOG GALAXY", StringComparison.InvariantCultureIgnoreCase)));
                     break;
                 case ApplicationKind.RobloxPlayer:
                 case ApplicationKind.XboxGame:
