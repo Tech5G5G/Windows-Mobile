@@ -3,25 +3,15 @@ using craftersmine.SteamGridDBNet;
 using GameFinder.RegistryUtils;
 using GameFinder.StoreHandlers.Steam;
 using ICSharpCode.SharpZipLib.Zip;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Drawing.Imaging;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Windows_Mobile.Iconography;
 using NexusMods.Paths;
-using Microsoft.UI.Xaml.Media.Imaging;
 using GameFinder.StoreHandlers.GOG;
 using Microsoft.Win32;
-using Windows.ApplicationModel.Core;
 using Windows.Management.Deployment;
-using Windows.ApplicationModel;
 using Microsoft.WindowsAPICodePack.Shell;
-using Windows_Mobile.MC;
 
 namespace Windows_Mobile.Indexing
 {

@@ -1,5 +1,4 @@
-﻿using System;
-using Windows.UI.Input.Preview.Injection;
+﻿using Windows.UI.Input.Preview.Injection;
 
 namespace Windows_Mobile.Input
 {

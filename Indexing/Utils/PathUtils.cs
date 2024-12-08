@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace Windows_Mobile.Indexing.Utils
+﻿namespace Windows_Mobile.Indexing.Utils
 {
     public static class PathUtils
     {

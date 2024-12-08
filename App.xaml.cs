@@ -1,12 +1,4 @@
-﻿using Microsoft.UI.Xaml;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Windows.ApplicationModel;
-using System.Linq;
-using Windows.ApplicationModel.Core;
-using Windows.Management.Deployment;
-using Windows_Mobile.Indexing;
+﻿using Windows.Management.Deployment;
 using craftersmine.SteamGridDBNet;
 using Windows.Storage;
 using System.Runtime.InteropServices;

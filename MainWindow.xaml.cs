@@ -1,29 +1,12 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Collections.ObjectModel;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using System.Diagnostics;
 using CommunityToolkit.WinUI.Animations;
 using CommunityToolkit.WinUI.Collections;
 using Windows.Networking.Connectivity;
 using Windows.Devices.Power;
 using CoreAudio;
-using Windows_Mobile.Indexing;
-using Windows_Mobile.Networking;
-using Windows_Mobile.MC;
 using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
 using Windows.UI.Input.Preview.Injection;
-using Windows.System;
 using Windows.Gaming.Input;
-using Windows_Mobile.Input;
 
 namespace Windows_Mobile
 {

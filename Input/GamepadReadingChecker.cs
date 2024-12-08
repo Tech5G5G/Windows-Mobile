@@ -1,6 +1,4 @@
-﻿using System;
-using Windows.Gaming.Input;
-using Windows.System;
+﻿using Windows.Gaming.Input;
 using Windows.UI.Input.Preview.Injection;
 
 namespace Windows_Mobile.Input

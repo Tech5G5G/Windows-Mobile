@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.UI.Xaml.Media.Imaging;
-
-namespace Windows_Mobile.MC
+﻿namespace Windows_Mobile.MC
 {
     ///<summary>Used for identifying mods</summary>
     public enum ModKind

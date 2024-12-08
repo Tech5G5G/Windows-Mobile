@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using craftersmine.SteamGridDBNet;
-using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace Windows_Mobile.Indexing
 {
