@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:items="using:Windows_Mobile.Indexing"
+    xmlns:notifs="using:Windows_Mobile.Notifications"
     xmlns:minec="using:Windows_Mobile.MC"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -39,7 +40,7 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate x:Key="NotificationTemplate" x:DataType="items:Notification">
+            <DataTemplate x:Key="NotificationTemplate" x:DataType="notifs:Notification">
                 <SwipeControl HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="12,0,10,0" Margin="0,0,0,4" CornerRadius="4" Background="{ThemeResource LayerOnAccentAcrylicFillColorDefault}" BorderBrush="{ThemeResource ControlStrokeColorOnAccentSecondary}" BorderThickness="1">
                     <SwipeControl.LeftItems>
                         <SwipeItems Mode="Execute">

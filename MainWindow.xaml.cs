@@ -19,7 +19,7 @@ namespace Windows_Mobile
         AdvancedCollectionView search = new(allApps, true);
 
         ObservableCollection<MCModInfo> mods = [];
-        ObservableCollection<Indexing.Notification> notifications = [];
+        ObservableCollection<Notifications.Notification> notifications = [];
 
         public MainWindow()
         {
