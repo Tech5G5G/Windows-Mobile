@@ -14,10 +14,7 @@
     <Grid>
         <Grid.Resources>
             <DataTemplate x:Key="StartMenuItemTemplate" x:DataType="items:StartMenuItem">
-                <StackPanel Orientation="Horizontal" Holding="StartMenuItem_Holding" RightTapped="StartMenuItem_RightTapped" Height="36" Background="Transparent" Spacing="8">
-                    <StackPanel.Tag>
-                        <items:StartMenuItem ItemKind="{x:Bind ItemKind}" ItemStartURI="{x:Bind ItemStartURI}" Icon="{x:Bind Icon}" />
-                    </StackPanel.Tag>
+                <StackPanel Tag="{x:Bind}" Orientation="Horizontal" Holding="StartMenuItem_Holding" RightTapped="StartMenuItem_RightTapped" Height="36" Background="Transparent" Spacing="8">
                     <Image Source="{x:Bind Icon}" VerticalAlignment="Center" Height="24" Width="24" />
                     <TextBlock Text="{x:Bind ItemName}" VerticalAlignment="Center" />
                 </StackPanel>
