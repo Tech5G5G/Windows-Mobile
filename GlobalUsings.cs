@@ -19,3 +19,4 @@ global using Windows_Mobile.Indexing;
 global using Windows_Mobile.Networking;
 global using Windows_Mobile.MC;
 global using Windows_Mobile.Input;
+global using Windows_Mobile.Helpers;

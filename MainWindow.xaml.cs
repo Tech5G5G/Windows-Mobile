@@ -261,9 +261,7 @@ namespace Windows_Mobile
             else if (changeKind == UserNotificationChangedKind.Added)
             {
                 var notifications = await sender.GetNotificationsAsync(NotificationKinds.Toast);
-                UserNotification notification = null;
-                try { notification = notifications.First(i => i.Id == changedId); }
-                catch { }
+                UserNotification notification = ValueAssigner.TryAssign(() => notifications.First(i => i.Id == changedId));
                 this.DispatcherQueue.TryEnqueue(async () => this.notifications.Insert(0, await Notifications.Notification.FromUserNotification(notification, allApps)));
             }
             else if (changeKind == UserNotificationChangedKind.Removed)

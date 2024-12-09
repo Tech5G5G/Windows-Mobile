@@ -89,16 +89,10 @@ namespace Windows_Mobile.Indexing
                 var steamGame = game.Value as SteamGame;
                 if (steamGame is not null && steamGame.AppId.Value != 228980)
                 {
-                    SteamGridDbGame gameInfo = null;
+                    SteamGridDbGame gameInfo = await ValueAssigner.TryAssignAsync<SteamGridDbGame, SteamGridDbNotFoundException>(
+                        async () => await App.db.GetGameBySteamIdAsync((int)steamGame.AppId.Value),
+                        async () => (await App.db.SearchForGamesAsync(steamGame.Name)).First());
                     BitmapImage bitmapImage = new();
-                    try
-                    {
-                        gameInfo = await App.db.GetGameBySteamIdAsync((int)steamGame.AppId.Value);
-                    }
-                    catch (SteamGridDbNotFoundException)
-                    {
-                        gameInfo = (await App.db.SearchForGamesAsync(steamGame.Name)).First();
-                    }
 
                     var image = await App.db.GetIconsForGameAsync(gameInfo);
                     if (image.Length != 0)
