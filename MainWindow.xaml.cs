@@ -48,15 +48,15 @@ namespace Windows_Mobile
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
             };
-            App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
-            {
-                notifCenter.Visibility = Visibility.Collapsed;
-                notifCenterButton.IsChecked = false;
-            };
+            // App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
+            // {
+            //     notifCenter.Visibility = Visibility.Collapsed;
+            //     notifCenterButton.IsChecked = false;
+            // };
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
-            else builtin_RadioButton.IsChecked = true;
+            // if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
+            // else builtin_RadioButton.IsChecked = true;
 
             PopulateStartMenu();
             SetControlCenterIcons();
@@ -707,6 +707,11 @@ namespace Windows_Mobile
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
                 ApplicationStarter.FromFileName(process, args, true);
+        }
+        private async void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ContentDialog() { Content = new CommunityToolkit.WinUI.Controls.SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE713" }, Header = "Hello World", Description = "hello world", Margin = new Thickness(4) }, Title = "Settings", CloseButtonText = "Done", XamlRoot = this.Content.XamlRoot };
+            await dialog.ShowAsync();
         }
     }
 }

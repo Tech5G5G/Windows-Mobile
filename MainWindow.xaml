@@ -131,7 +131,8 @@
                         <ListView x:Name="appsView" ElementSoundMode="FocusOnly" KeyDown="StartMenuItem_KeyDown" SelectionMode="None" IsItemClickEnabled="True" ItemClick="Apps_ItemClick" Padding="0,0,0,3" ItemTemplate="{StaticResource StartMenuItemTemplate}" VerticalAlignment="Stretch" />
                     </NavigationView>
                 </Grid>
-                <StackPanel VerticalAlignment="Bottom" Margin="52,12" HorizontalAlignment="Right">
+                <StackPanel VerticalAlignment="Bottom" Margin="52,12" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="{ui:FontIcon FontSize=16, Glyph=&#xE713;}" ToolTipService.ToolTip="Settings" Height="40" Width="40" Background="Transparent" BorderThickness="0" Click="SettingsButton_Click" />
                     <Button Content="{ui:FontIcon FontSize=16, Glyph=&#xE7E8;}" ToolTipService.ToolTip="Power" Height="40" Width="40" Background="Transparent" BorderThickness="0">
                         <Button.Flyout>
                             <MenuFlyout>
