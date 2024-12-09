@@ -226,7 +226,7 @@ namespace Windows_Mobile
             if (App.Settings.IsGlobalNotifCenterEnabled) 
             {
                 (sender as ToggleButton).IsChecked = false;
-                Process.Start(new ProcessStartInfo("ms-actioncenter://") { UseShellExecute = true });
+                ApplicationStarter.FromFileName("ms-actioncenter://");
                 ElementSoundPlayer.Play(ElementSoundKind.Invoke);
             }
             else
@@ -285,8 +285,8 @@ namespace Windows_Mobile
         }
         private void SwipeItem_Invoked(SwipeItem sender, SwipeItemInvokedEventArgs args) => Dismiss_Notification((uint)sender.CommandParameter);
         private void Notif_DismissButton_Click(object sender, RoutedEventArgs e) => Dismiss_Notification((uint)(sender as Button).Tag);
-        private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:notifications") { UseShellExecute = true });
-        private void DateTimeButton_Click(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:dateandtime") { UseShellExecute = true });
+        private void NotifSettingsButton_Click(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:notifications");
+        private void DateTimeButton_Click(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:dateandtime");
         private void NotifRadioContext_Click(object sender, RoutedEventArgs e) => App.Settings.IsGlobalNotifCenterEnabled = bool.Parse((string)(sender as Control).Tag);
 
         private void SetControlCenterIcons()
@@ -417,7 +417,7 @@ namespace Windows_Mobile
             Indexers.IndexStartMenuFolder("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs", allApps);
         }
 
-        private void Open_ControlCenter(object sender, RoutedEventArgs args) => Process.Start(new ProcessStartInfo("ms-actioncenter:controlcenter/&showFooter=true") { UseShellExecute = true });
+        private void Open_ControlCenter(object sender, RoutedEventArgs args) => ApplicationStarter.FromFileName("ms-actioncenter:controlcenter/&showFooter=true");
         private void StartMenu_Click(object sender, RoutedEventArgs e)
         {
             if ((AppWindow.Size.Height / this.Content.XamlRoot.RasterizationScale) - 80 - (AppWindow.Size.Height * 7 / 8).Clamp(725, 400) < 54)
@@ -438,11 +438,11 @@ namespace Windows_Mobile
             startMenu.Visibility = Visibility.Collapsed;
             startMenuButton.IsChecked = false;
         }
-        private void Open_Diagnostics(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:troubleshoot") { UseShellExecute = true });
-        private void Open_NetworkInternet(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:network-status") { UseShellExecute = true });
-        private void Open_VolumeMixer(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:apps-volume") { UseShellExecute = true });
-        private void Open_SoundSettings(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:sound") { UseShellExecute = true });
-        private void Open_PowerSleep(object sender, RoutedEventArgs e) => Process.Start(new ProcessStartInfo("ms-settings:powersleep") { UseShellExecute = true });
+        private void Open_Diagnostics(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:troubleshoot");
+        private void Open_NetworkInternet(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:network-status");
+        private void Open_VolumeMixer(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:apps-volume");
+        private void Open_SoundSettings(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:sound");
+        private void Open_PowerSleep(object sender, RoutedEventArgs e) => ApplicationStarter.FromFileName("ms-settings:powersleep");
 
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
@@ -490,7 +490,7 @@ namespace Windows_Mobile
                         if (selection == ContentDialogResult.Primary)
                             ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
-                            Process.Start(new ProcessStartInfo($"steam://openurl/https://store.steampowered.com/app/{selectedItemInfo.Id}") { UseShellExecute = true });
+                            ApplicationStarter.FromFileName($"steam://openurl/https://store.steampowered.com/app/{selectedItemInfo.Id}");
                     }
                     else if (selectedItemInfo.ItemKind == ApplicationKind.EpicGamesGame || selectedItemInfo.ItemKind == ApplicationKind.RobloxPlayer)
                     {
@@ -507,7 +507,7 @@ namespace Windows_Mobile
                         if (selection == ContentDialogResult.Primary)
                             ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
-                            Process.Start(new ProcessStartInfo($"msxbox://game/?productId={selectedItemInfo.Id}") { UseShellExecute = true });
+                            ApplicationStarter.FromFileName($"msxbox://game/?productId={selectedItemInfo.Id}");
                     }
                     else if (selectedItemInfo.ItemKind == ApplicationKind.GOGGame)
                     {
@@ -517,7 +517,7 @@ namespace Windows_Mobile
                         if (selection == ContentDialogResult.Primary)
                             ApplicationStarter.FromStartMenuItem(selectedItemInfo);
                         else if (selection == ContentDialogResult.Secondary)
-                            Process.Start(new ProcessStartInfo($"goggalaxy://openGameView/{selectedItemInfo.Id}") { UseShellExecute = true });
+                            ApplicationStarter.FromFileName($"goggalaxy://openGameView/{selectedItemInfo.Id}");
                     }
                 }
             }
@@ -549,7 +549,7 @@ namespace Windows_Mobile
             adminButton.Click += (sender, args) => ApplicationStarter.FromStartMenuItem(allApps.First(i => i.Icon == (senderPanel.Tag as StartMenuItem).Icon), true);
 
             var locationButton = new MenuFlyoutItem() { Text = "Open file location", Icon = new FontIcon() { Glyph = "\uED43" }, Visibility = Visibility.Collapsed };
-            locationButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("explorer.exe", $"/select, {(senderPanel.Tag as StartMenuItem).ItemStartURI}") { UseShellExecute = true });
+            locationButton.Click += (sender, args) => ApplicationStarter.FromFileName("explorer.exe", $"/select, {(senderPanel.Tag as StartMenuItem).ItemStartURI}");
 
             var uninstallButton = new MenuFlyoutItem() { Text = "Uninstall", Icon = new FontIcon() { Glyph = "\uE74D" } };
 
@@ -562,13 +562,13 @@ namespace Windows_Mobile
                     openButton.Icon = new FontIcon() { Glyph = "\uE737" };
                     adminButton.Visibility = Visibility.Visible;
                     locationButton.Visibility = Visibility.Visible;
-                    uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
+                    uninstallButton.Click += (sender, args) => ApplicationStarter.FromFileName("ms-settings:appsfeatures");
                     break;
                 case ApplicationKind.Packaged:
                 case ApplicationKind.LauncherPackaged:
                     openButton.Text = "Open";
                     openButton.Icon = new FontIcon() { Glyph = "\uE737" };
-                    uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
+                    uninstallButton.Click += (sender, args) => ApplicationStarter.FromFileName("ms-settings:appsfeatures");
                     break;
                 case ApplicationKind.SteamGame:
                     openButton.Text = "Play";
@@ -589,7 +589,7 @@ namespace Windows_Mobile
                 case ApplicationKind.XboxGame:
                     openButton.Text = "Play";
                     openButton.Icon = new FontIcon() { Glyph = "\uE768" };
-                    uninstallButton.Click += (sender, args) => Process.Start(new ProcessStartInfo("ms-settings:appsfeatures") { UseShellExecute = true });
+                    uninstallButton.Click += (sender, args) => ApplicationStarter.FromFileName("ms-settings:appsfeatures");
                     break;
             }
 
@@ -680,8 +680,9 @@ namespace Windows_Mobile
 
         private async void PowerMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            ProcessStartInfo processInfo = null;
             var dialog = new ContentDialog() { XamlRoot = this.Content.XamlRoot, PrimaryButtonText = "Yes", CloseButtonText = "No", DefaultButton = ContentDialogButton.Primary };
+            string process = null;
+            string args = null;
 
             switch ((sender as MenuFlyoutItem).Text)
             {
@@ -689,19 +690,23 @@ namespace Windows_Mobile
                     App.LockWorkStation();
                     return;
                 case "Shut down":
-                    processInfo = new ProcessStartInfo("shutdown", "/s /t 0") { CreateNoWindow = true };
+                    process = "shutdown";
+                    args = "/s /t 0";
+                    
                     dialog.Title = "Shut down";
                     dialog.Content = "Are you sure you want to shut down?";
                     break;
                 case "Restart":
-                    processInfo = new ProcessStartInfo("shutdown", "/r /t 0") { CreateNoWindow = true };
+                    process = "shutdown";
+                    args = "/r /t 0";
+
                     dialog.Title = "Restart";
                     dialog.Content = "Are you sure you want to restart?";
                     break;
             }
 
             if (await dialog.ShowAsync() == ContentDialogResult.Primary)
-                Process.Start(processInfo);
+                ApplicationStarter.FromFileName(process, args, true);
         }
     }
 }
