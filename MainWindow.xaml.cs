@@ -712,14 +712,21 @@ namespace Windows_Mobile
         }
         private async void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
+            //Try make the content of ContentDialog XAML
+
             var combo = new ComboBox();
             combo.Items.Add("Desktop");
             combo.Items.Add("Custom");
             combo.SelectedIndex = 0;
 
+            var expander = new SettingsExpander() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7F9" /*Change this icon to the icon from Settings app*/ }, Header = "Background", Description = "Use the desktop background or a custom background", Content = combo };
+            expander.Items.Add(new SettingsCard() { Header = "Background file location", Content = new TextBox() { PlaceholderText = "File location" }, IsEnabled = false });
+
+            combo.SelectionChanged += (sender, args) => (expander.Items[0] as SettingsCard).IsEnabled = combo.SelectedIndex == 1;
+
             var content = new StackPanel() { Spacing = 4 };
             content.Children.Add(new SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7E8" }, Header = "Start at startup", Description = "Automatically use Windows Mobile at startup", Content = new ToggleSwitch() });
-            content.Children.Add(new SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7F9" /*Change this icon to Set Background icon from File Explorer*/ }, Header = "Wallpaper", Description = "Use the desktop wallpaper or a custom wallpaper", Content = combo });
+            content.Children.Add(expander);
 
             var dialog = new ContentDialog() { Content = content, Title = "Settings", CloseButtonText = "Done", XamlRoot = this.Content.XamlRoot };
             await dialog.ShowAsync();
