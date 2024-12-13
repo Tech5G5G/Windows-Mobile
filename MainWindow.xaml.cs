@@ -8,6 +8,7 @@ using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
 using Windows.UI.Input.Preview.Injection;
 using Windows.Gaming.Input;
+using CommunityToolkit.WinUI;
 
 namespace Windows_Mobile
 {
@@ -711,7 +712,16 @@ namespace Windows_Mobile
         }
         private async void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new ContentDialog() { Content = new SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7E8" }, Header = "Start at startup", Description = "Automatically use Windows Mobile at startup", Margin = new Thickness(4), Content = new ToggleSwitch() }, Title = "Settings", CloseButtonText = "Done", XamlRoot = this.Content.XamlRoot };
+            var combo = new ComboBox();
+            combo.Items.Add("Desktop");
+            combo.Items.Add("Custom");
+            combo.SelectedIndex = 0;
+
+            var content = new StackPanel() { Spacing = 8 };
+            content.Children.Add(new SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7E8" }, Header = "Start at startup", Description = "Automatically use Windows Mobile at startup", Margin = new Thickness(4), Content = new ToggleSwitch() });
+            content.Children.Add(new SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7E8" }, Header = "Wallpaper", Description = "Use the desktop wallpaper or a custom wallpaper", Margin = new Thickness(4), Content = combo });
+
+            var dialog = new ContentDialog() { Content = content, Title = "Settings", CloseButtonText = "Done", XamlRoot = this.Content.XamlRoot };
             await dialog.ShowAsync();
         }
     }
