@@ -2,17 +2,17 @@
 
 namespace Windows_Mobile.Input
 {
-    public class GamepadCheckButton (bool newButtonEnabled, InjectedInputKeyboardInfo inputInfo)
+    public readonly struct GamepadCheckButton (bool newButtonEnabled, InjectedInputKeyboardInfo inputInfo)
     {
-        public bool ButtonEnabled { get; set; } = newButtonEnabled;
-        public InjectedInputKeyboardInfo InputInfo { get; set; } = inputInfo;
+        public bool ButtonEnabled { get; } = newButtonEnabled;
+        public InjectedInputKeyboardInfo InputInfo { get; } = inputInfo;
     }
 
-    public class GamepadCheckTimedButton(bool newButtonEnabled, DateTime? newButtonEnabledChanged, double newTimerInterval, InjectedInputKeyboardInfo inputInfo)
+    public readonly struct GamepadCheckTimedButton(bool newButtonEnabled, DateTime? newButtonEnabledChanged, double newTimerInterval, InjectedInputKeyboardInfo inputInfo)
     {
-        public bool ButtonEnabled { get; set; } = newButtonEnabled;
-        public DateTime? ButtonEnabledChanged { get; set; } = newButtonEnabledChanged;
-        public double TimerInterval { get; set; } = newTimerInterval;
-        public InjectedInputKeyboardInfo InputInfo { get; set; } = inputInfo;
+        public bool ButtonEnabled { get; } = newButtonEnabled;
+        public DateTime? ButtonEnabledChanged { get; } = newButtonEnabledChanged;
+        public double TimerInterval { get; } = newTimerInterval;
+        public InjectedInputKeyboardInfo InputInfo { get; } = inputInfo;
     }
 }
