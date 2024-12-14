@@ -1,5 +1,6 @@
 using CommunityToolkit.WinUI.Animations;
 using CommunityToolkit.WinUI.Collections;
+using CommunityToolkit.WinUI.Controls;
 using Windows.Networking.Connectivity;
 using Windows.Devices.Power;
 using CoreAudio;
@@ -7,6 +8,7 @@ using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
 using Windows.UI.Input.Preview.Injection;
 using Windows.Gaming.Input;
+using CommunityToolkit.WinUI;
 
 namespace Windows_Mobile
 {
@@ -48,15 +50,15 @@ namespace Windows_Mobile
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
             };
-            App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
-            {
-                notifCenter.Visibility = Visibility.Collapsed;
-                notifCenterButton.IsChecked = false;
-            };
+            // App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
+            // {
+            //     notifCenter.Visibility = Visibility.Collapsed;
+            //     notifCenterButton.IsChecked = false;
+            // };
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
-            else builtin_RadioButton.IsChecked = true;
+            // if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
+            // else builtin_RadioButton.IsChecked = true;
 
             PopulateStartMenu();
             SetControlCenterIcons();
@@ -710,7 +712,23 @@ namespace Windows_Mobile
         }
         private async void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new ContentDialog() { Content = new CommunityToolkit.WinUI.Controls.SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE713" }, Header = "Hello World", Description = "hello world", Margin = new Thickness(4) }, Title = "Settings", CloseButtonText = "Done", XamlRoot = this.Content.XamlRoot };
+            //Try make the content of ContentDialog XAML
+
+            var combo = new ComboBox();
+            combo.Items.Add("Desktop");
+            combo.Items.Add("Custom");
+            combo.SelectedIndex = 0;
+
+            var expander = new SettingsExpander() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7F9" /*Change this icon to the icon from Settings app*/ }, Header = "Background", Description = "Use the desktop background or a custom background", Content = combo };
+            expander.Items.Add(new SettingsCard() { Header = "Background file location", Content = new TextBox() { PlaceholderText = "File location" }, IsEnabled = false });
+
+            combo.SelectionChanged += (sender, args) => (expander.Items[0] as SettingsCard).IsEnabled = combo.SelectedIndex == 1;
+
+            var content = new StackPanel() { Spacing = 4 };
+            content.Children.Add(new SettingsCard() { MinWidth = 400, HorizontalAlignment = HorizontalAlignment.Stretch, HeaderIcon = new FontIcon() { Glyph = "\uE7E8" }, Header = "Start at startup", Description = "Automatically use Windows Mobile at startup", Content = new ToggleSwitch() });
+            content.Children.Add(expander);
+
+            var dialog = new ContentDialog() { Content = content, Title = "Settings", CloseButtonText = "Done", XamlRoot = this.Content.XamlRoot };
             await dialog.ShowAsync();
         }
     }
