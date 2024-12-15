@@ -368,6 +368,3 @@ FodyWeavers.xsd
 .vscode/tasks.json
 .vsconfig
 Windows Mobile (VS Code).csproj
-
-#Others
-Properties/
