@@ -50,15 +50,15 @@ namespace Windows_Mobile
                 notificationsPlaceholder.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                 clearAllButton.Visibility = status ? Visibility.Collapsed : Visibility.Visible;
             };
-            // App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
-            // {
-            //     notifCenter.Visibility = Visibility.Collapsed;
-            //     notifCenterButton.IsChecked = false;
-            // };
+            App.Settings.IsGlobalNotifCenterEnabledChanged += (args) =>
+            {
+                notifCenter.Visibility = Visibility.Collapsed;
+                notifCenterButton.IsChecked = false;
+            };
 
             wallpaperImage.ImageSource = new BitmapImage() { UriSource = new Uri("C:\\Users\\" + Environment.UserName + "\\AppData\\Roaming\\Microsoft\\Windows\\Themes\\TranscodedWallpaper") };
-            // if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
-            // else builtin_RadioButton.IsChecked = true;
+            if (App.Settings.IsGlobalNotifCenterEnabled) global_RadioButton.IsChecked = true;
+            else builtin_RadioButton.IsChecked = true;
 
             PopulateStartMenu();
             SetControlCenterIcons();
