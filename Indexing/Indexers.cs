@@ -417,8 +417,7 @@ namespace Windows_Mobile.Indexing
                         string path = targetPath switch
                         {
                             "File Explorer" => @"C:\Windows\explorer.exe",
-                            "Control Panel" => @"C:\Windows\System32\shell32.dll",
-                            "Run..." => @"C:\Windows\System32\shell32.dll",
+                            "Control Panel" or "Run..." => @"C:\Windows\System32\shell32.dll",
                             @"C:\Windows\system32\control.exe" => name == "Windows Tools" ? @"C:\Windows\System32\imageres.dll" : targetPath,
                             "Administrative Tools" => @"C:\Windows\System32\imageres.dll",
                             _ => targetPath
